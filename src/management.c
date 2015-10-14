@@ -133,7 +133,8 @@ unsigned long manager_up_thread(
     Management manager, 
     pthread_t thread 
 ) {
-    return manager->thread_count++;
+    manager->thread_count += 1;
+    return manager->thread_count;
 }
 
 /**
@@ -148,6 +149,7 @@ unsigned long manager_down_thread(
     if( manager->thread_count == 1 ){
         manager->last_thread = thread;
     }
-    return manager->thread_count--;
+    manager->thread_count -= 1;
+    return manager->thread_count;
 }
 

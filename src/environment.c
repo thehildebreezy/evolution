@@ -287,12 +287,14 @@ void *connection_thread( void *arg ) {
 	// wait for threads to clean themselves
 	while( manager_thread_count( conn->manager ) > 0 ){
 	    // going to wait for threads to clean themselves up
-	    if( conn->manager->last_thread != 0 ){
-	        pthread_join( conn->manager->last_thread, NULL );
-	    }
 	    sched_yield();
 	}
 	
+	// wait for the last one
+    if( conn->manager->last_thread != 0 ){
+        printf("joining last thread\n");
+        pthread_join( conn->manager->last_thread, NULL );
+    }
 
 }
 
