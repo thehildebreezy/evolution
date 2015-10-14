@@ -72,6 +72,6 @@ int start_server( Server, int port );
 int stop_server( Server );
 
 // listens and accepts users from the server
-Client accept_client( Server );
+Client server_accept( Server );
 
 #endif

@@ -29,6 +29,17 @@ void action_add_to_manager( Management manager ) {
 
 }
 
+/**
+ * Cleans action table from the manager
+ * @param manager Management structure to clean
+ */
+void action_clean( HashTable actions ) {
+    if( actions != NULL ){
+        // clean everything, no special malloc so should be good
+        // might have to add a func later or special data destruction
+        destroy_hash_table_data( actions );
+    }
+}
 
 /**
  * Parses an action message from the user

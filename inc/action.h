@@ -10,7 +10,7 @@
 
 #include "user.h"
 #include "management.h"
-
+#include "hash.h"
 
 // action structure
 typedef struct action_struct {
@@ -20,6 +20,9 @@ typedef struct action_struct {
 
 // add actions to the manager
 void action_add_to_manager( Management );
+
+// clean up  actions from the manager
+void action_clean( HashTable );
 
 // parse the response
 int action_parse_response(

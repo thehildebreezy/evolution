@@ -123,9 +123,11 @@ int stop_server( Server server ) {
 }
 
 // listens and accepts users from the server
-Client accept_client( Server server ) {
+Client server_accept( Server server ) {
 
 	Client client = new_client();
+	if( client == NULL ) return NULL;
+	
 	int clilen = sizeof(client->address);
 
 
@@ -142,6 +144,9 @@ Client accept_client( Server server ) {
 		    } else {
 		        printf("No longer accepting clients\n");
 		    }
+		    
+		    destroy_client( client );
+		    
 		    return NULL;
 	    } else if( client->socket >= 0 ) {
 	        return client;

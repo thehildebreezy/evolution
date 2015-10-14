@@ -91,17 +91,15 @@ int client_send( Client client, char *message ) {
  * Receives a message from the client
  * @param client Client struct to receive from
  * @param message Pointer to unallocated message buffer to receive into
- * @param number of bytes received  or -1 on fail
+ * @param len initial length of the message
+ * @return number of bytes received  or -1 on fail
  */
-int client_recv( Client client, char **message ) {
+int client_recv( Client client, char **message, int len ) {
 
 	if( client->status != CLIENT_OK ) return -1;
 
-	unsigned long message_size = 1024;
 
-	*message = (char *) malloc( message_size );
-
-	int n = read( client->socket, *message, message_size );
+	int n = read( client->socket, *message, len );
 	if( errno != EWOULDBLOCK && errno != EAGAIN &&  n < 0 ){
 		perror("Error recv from client");
 		return -1;

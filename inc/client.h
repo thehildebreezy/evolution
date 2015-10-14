@@ -49,19 +49,19 @@ typedef struct client_struct {
 Client new_client();
 
 // destorys a client
-void destroy_client( Client client);
+void destroy_client( Client );
 
 // set client status to ready
-void client_ok( Client client );
+void client_ok( Client );
 
 // closes the client
-void close_client( Client client);
+void close_client( Client );
 
 // send message to client
-int client_send( Client client, char *message );
+int client_send( Client, char * );
 
 // receive message from client
-int client_recv( Client client, char **message );
+int client_recv( Client, char **, int );
 
 #endif /* INC_CLIENT_H_ */
 

@@ -122,7 +122,8 @@ void environment_loop( Server server, Management manager ) {
 	// pthread_kill( thread, SIGINT );
 	pthread_join( thread, NULL );
 
-
+    // free conn arg
+    free( conn );
 
 	printf("exiting\n");
 }
@@ -147,6 +148,9 @@ void *user_thread( void *arg ) {
 
 	User user = new_user( ((Environment)arg)->client );
 	Management manager = ((Environment)arg)->manager;
+
+    // increase thread count
+    manager_up_thread( manager, pthread_self() );
 
 	// add the user to the list of users
 	manager_add_user( manager, user );
@@ -184,13 +188,21 @@ void *user_thread( void *arg ) {
 
 
 	// accept input
-	char *buff = NULL;
+	
+	// initialize
+    int buff_len = 256;
+	char *buff = (char *) malloc( buff_len );
+	memset( buff, 0, 256 );
+	if( buff == NULL ){
+	    perror("client thread recv buffer malloc");
+	    return NULL;
+	}
 
 	// user response loop
 	while( manager->cease != 1 ){
 
 		// receive response from client
-		int length = client_recv( user->client, &buff );
+		int length = client_recv( user->client, &buff, buff_len );
 
 		// handle response
 		if( buff != NULL && length > 0 ){
@@ -198,21 +210,29 @@ void *user_thread( void *arg ) {
 			// parse the response for actionable text
 			action_parse_response( buff, length, user, manager );
 
-			// and clean house
-			free(buff);
+		} else {
+		    // nothing going on, yield
+		    sched_yield();
 		}
 
 	}
+	
+	free( buff );
+
 
 	// remove from manager list
 	manager_remove_user( manager, user );
 
 	// close and destory all structs
+	// manually manage this part
 	close_client( user->client );
 	destroy_client( user->client );
 	destroy_user( user );
+	
 	free( ((Environment)arg) );
 
+    // decrease thread count
+    manager_down_thread( manager, pthread_self() );
     pthread_exit( 0 );
 
 	return NULL;
@@ -228,7 +248,9 @@ void *connection_thread( void *arg ) {
 	ConnectionThreadStruct conn = (ConnectionThreadStruct)arg;
 
 	while( cease != 1 ){
-		Client client = accept_client( conn->server );
+		Client client = server_accept( conn->server );
+
+        if( client == NULL ) continue;
 
         // make the client non blocking
         int status = fcntl(
@@ -242,7 +264,6 @@ void *connection_thread( void *arg ) {
             perror("calling fcntl");
         }
 
-		if( client == NULL ) continue;
 
 		Environment arg =  new_env_arg( client, conn->manager );
 
@@ -263,14 +284,15 @@ void *connection_thread( void *arg ) {
 
 	}
 	
-	LinkedList next = conn->manager->users;
-	while( next != NULL ){
-	    User user = (User)next->data;
-	    if( user != NULL && user->client != NULL ){
-	        pthread_join( user->client->thread, NULL );
+	// wait for threads to clean themselves
+	while( manager_thread_count( conn->manager ) > 0 ){
+	    // going to wait for threads to clean themselves up
+	    if( conn->manager->last_thread != 0 ){
+	        pthread_join( conn->manager->last_thread, NULL );
 	    }
-	    next = next->next;
+	    sched_yield();
 	}
+	
 
 }
 
@@ -296,6 +318,7 @@ Environment new_env_arg( Client client, Management manager ) {
 
 	return arg;
 }
+
 
 void interrupted( int dummy ) {
 	cease = 1;

@@ -68,7 +68,11 @@ int destroy_hash_table( HashTable table )
 			free( destroy );
 		}
 	}
+	
+	// free buckets table
+	free(table->table);
 
+    // free table struct
 	free( table );
 
 	return 0;
@@ -80,17 +84,21 @@ int destroy_hash_table_data( HashTable table )
 {
 	int i = 0;
 	for( ; i < table->num_buckets; i++ ){
-
 		// loop over all buckets and destroy links
 		HashTableLink next = table->table[i];
 		while( next != NULL ){
 			HashTableLink destroy = next;
 			next = next->next;
-			free( destroy->data );
+			if( destroy->data ){
+			    free( destroy->data );
+			}
 			free( destroy );
 		}
 	}
 
+	// free buckets table
+	free(table->table);
+	
 	free( table );
 
 	return 0;

@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include "../inc/management.h"
+#include "../inc/action.h"
 #include "../inc/list.h"
 #include "../inc/hash.h"
 
@@ -32,6 +33,10 @@ Management new_manager() {
     memset( manager, 0, sizeof( struct evolution_management_struct ) );
 
 	manager->users = NULL;
+	
+	manager->cease = 0;
+    manager->thread_count = 0;
+    manager->last_thread = (pthread_t)0;
 
 	// generate the hash table base
 	manager->actions = create_hash_table(
@@ -60,7 +65,7 @@ void destroy_manager( Management manager ) {
 
 	// destroy hash table with data
 	if( manager->actions != NULL ){
-		destroy_hash_table_data( manager->actions );
+		action_clean( manager->actions );
 	}
 
 	free( manager );
@@ -85,6 +90,64 @@ void manager_remove_user( Management manager, User user ) {
 			&(manager->users),
 			user
 		);
+		
+	// and destroy the linked item
+	destroy_linked_item( dropped_user );
 }
 
+
+/**
+ * Set manager to ceased 
+ * @param manager Management struct
+ */
+void manager_set_ceased( Management manager ) {
+    manager->cease = 1;
+}
+
+
+/** 
+ * Reports if the manager is ceased yet
+ * @param manager Manager to check
+ * @return 1 if true, 0 otherwise
+ */
+int manager_is_ceased( Management manager ) {
+    return manager->cease == 1;
+}
+
+
+/**
+ * Retrieve thread count
+ * @param manager management struct
+ * @return number of threads still working
+ */
+unsigned long manager_thread_count( Management manager ) {
+    return manager->thread_count;
+}
+
+/**
+ * Increase thread count
+ * @param manager management struct
+ * @return number of threads still working
+ */
+unsigned long manager_up_thread( 
+    Management manager, 
+    pthread_t thread 
+) {
+    return manager->thread_count++;
+}
+
+/**
+ * Decrease thread count, setes last thread if this the last thread
+ * @param manager management struct
+ * @return number of threads still working
+ */
+unsigned long manager_down_thread( 
+    Management manager,
+    pthread_t thread
+){
+    if( manager->thread_count == 1 ){
+        manager->last_thread = thread;
+    }
+    return manager->thread_count--;
+}
 

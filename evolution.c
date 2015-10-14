@@ -33,7 +33,12 @@ int main( int argc, char **argv )
 	}
 
 	environment_loop( server, manager );
-
+	
+	
+	/* ---------------------------------------
+	 * Clean up 
+	 */
+	
 	close_server( server );
 	destroy_server( server );
 
