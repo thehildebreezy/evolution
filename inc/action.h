@@ -37,4 +37,7 @@ Action new_action( void *(*action_func)( const char *, User, Management ) );
 // look action
 void *action_look( const char *, User, Management);
 
+// shout action
+void *action_shout( const char *response, User user, Management manager);
+
 #endif /* INC_ACTION_H_ */

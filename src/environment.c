@@ -202,13 +202,23 @@ void *user_thread( void *arg ) {
 	while( manager->cease != 1 ){
 
 		// receive response from client
-		int length = client_recv( user->client, &buff, buff_len );
+		int length = client_recv( 
+		    user->client, 
+		    &buff, 
+		    &buff_len );
 
 		// handle response
 		if( buff != NULL && length > 0 ){
 
 			// parse the response for actionable text
-			action_parse_response( buff, length, user, manager );
+			action_parse_response( 
+			    buff,       // buffer with response
+			    length,     // length of response
+			    user,       // user making response
+			    manager );  // manager
+
+            // reset response
+            memset(buff,0,length);
 
 		} else {
 		    // nothing going on, yield

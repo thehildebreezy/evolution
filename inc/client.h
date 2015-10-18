@@ -61,7 +61,7 @@ void close_client( Client );
 int client_send( Client, char * );
 
 // receive message from client
-int client_recv( Client, char **, int );
+int client_recv( Client, char **, int * );
 
 #endif /* INC_CLIENT_H_ */
 

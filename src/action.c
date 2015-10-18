@@ -27,6 +27,9 @@ void action_add_to_manager( Management manager ) {
 	Action look = new_action( action_look );
 	hash_table_add( manager->actions, (void *)"look", look);
 
+	// add look action to actions table
+	Action shout = new_action( action_shout );
+	hash_table_add( manager->actions, (void *)"shout", shout);
 }
 
 /**
@@ -56,41 +59,43 @@ int action_parse_response(
 		Management manager
 ){
 
+    // parse first part of string
+    // all strings are only so big
+    char command[16];
+    command[0] = '\0';
+    int i=0;
+    while( 
+        i < 15 && 
+        i < length &&
+        !(  response[i] == ' '  || 
+            response[i] == '\0' || 
+            response[i] == '\n' ||
+            response[i] == '\r'
+        )
+    ){
+        command[i] = response[i];
+        i++;
+    }
 
-	// simple say
-	LinkedList next = manager->users;
-	while( next != NULL ){
-
-		// if it is this user
-		if( next->data == user ) {
-
-			// just say its you
-			client_send( ((User)(next->data))->client, "You say: ");
-
-		} else {
-
-			// send name of sender
-			client_send(
-					((User)(next->data))->client,
-					((User)(next->data))->character->name
-			);
-
-			// what to do when the client is not the user
-			client_send( ((User)(next->data))->client, " says: " );
-		}
-
-		// send message
-		client_send( ((User)(next->data))->client, response);
-		next = next_linked_item( next );
-	}
-
+    command[i] = '\0';
+    
 	// just testing
 	Action action = (Action)hash_table_get_from(
 			manager->actions,
-			"look" );
+			command );
+
 	if( action != NULL ){
-		action->action_func(NULL, user, manager);
+	    // check for extra response
+	    if( i == length ){
+	        action->action_func(NULL, user, manager);
+	    } else {
+	        action->action_func(response+i+1, user, manager);
+	    }
+		
+	} else {
+	    client_send( user->client, "I don't understand\n" );
 	}
+	
 
 	return 0;
 }
@@ -126,6 +131,48 @@ Action new_action( void *(*action_func)( const char *, User, Management ) ) {
  */
 void *action_look( const char *response, User user, Management manager) {
 
-	client_send( user->client, "You look around" );
+	client_send( user->client, "You look around\n" );
 	return NULL;
 }
+
+
+
+/**
+ * Speak to all users
+ * @param response message following action command
+ * @param user User making action request
+ * @param manager Global resource manager
+ */
+void *action_shout( const char *response, User user, Management manager) {
+
+	
+	// simple say
+	LinkedList next = manager->users;
+	while( next != NULL ){
+
+		// if it is this user
+		if( next->data == user ) {
+
+			// just say its you
+			client_send( ((User)(next->data))->client, "You shout: ");
+
+		} else {
+
+			// send name of sender
+			client_send(
+					((User)(next->data))->client,
+					((User)(next->data))->character->name
+			);
+
+			// what to do when the client is not the user
+			client_send( ((User)(next->data))->client, " shouts: " );
+		}
+
+		// send message
+		client_send( ((User)(next->data))->client, (char *)response);
+		next = next_linked_item( next );
+	}
+	
+	return NULL;
+}
+
