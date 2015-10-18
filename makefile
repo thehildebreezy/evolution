@@ -27,7 +27,7 @@ obj/func.o: src/func.c
 obj/util.a: obj/list.o obj/hash.o obj/func.o
 	ar cr obj/util.a obj/list.o obj/hash.o obj/func.o
 
-obj/environment.o: src/environment.o
+obj/environment.o: src/environment.c
 	gcc -c -o obj/environment.o src/environment.c
 
 obj/character.o: src/character.c
