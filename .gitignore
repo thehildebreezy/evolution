@@ -1,5 +1,8 @@
 *.[oa]
 *~
+*.user
+*.char
+*.save
+*.pass
 evolution
 
-*.o

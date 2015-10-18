@@ -63,5 +63,8 @@ int client_send( Client, char * );
 // receive message from client
 int client_recv( Client, char **, int * );
 
+// prompt response from client
+int client_prompt( Client, char *, char **, int * );
+
 #endif /* INC_CLIENT_H_ */
 

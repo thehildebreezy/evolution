@@ -12,6 +12,7 @@
 #include <errno.h>
 
 #include "../inc/client.h"
+#include "../inc/func.h"
 
 #define CLIENT_RECV_LIMIT 2048
 #define CLIENT_RECV_HALF_LIMIT 1024
@@ -133,18 +134,26 @@ int client_recv( Client client, char **message, int *length ) {
 	    
 	    rx += n;
 	    
+	    // burn the rest
+	    if( rx == CLIENT_RECV_LIMIT ) {
+	        int m = 0;
+	        char burn[128];
+	        while( m >= 0 ){
+                m = read( client->socket, burn, 128 );
+	        }
+	        break;
+	    }
 	    
 	    // full buffer, grow
 	    if( rx == *length ){
-	        char *temp;
-	        temp = realloc( *message, *length + 256 );
-	        if( temp == NULL ){
+	    
+	        int grow_length = grow_buffer( message, *length+256 );
+	        if( grow_length < 0 ){
                 perror("Error realloc client recv");
 	            break;
 	        }
 	        
-	        *length = *length + 256;
-	        *message = temp;
+	        *length = grow_length;
 	    }
 	    
 	    
@@ -155,5 +164,26 @@ int client_recv( Client client, char **message, int *length ) {
 	*message[rx] == '\0';
 	
 	return rx;
+}
+
+
+/**
+ * Prompts user for a response
+ * @param client Client to prompt
+ * @param prompt Prompt to give to user for input
+ * @param response Response buffer to fill
+ * @param length Initial length of response buffer
+ * @return status of the receive or -1 on failure
+ */
+int client_prompt( 
+    Client client, 
+    char *prompt, 
+    char **response, 
+    int *length
+){
+    int status = client_send( client, prompt );
+    if( status < 0 ) return -1;
+    
+    return client_recv( client, response, length );
 }
 

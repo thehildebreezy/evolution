@@ -34,6 +34,10 @@ Management new_manager() {
 
 	manager->users = NULL;
 	
+	pthread_mutex_t mutex;
+	pthread_mutex_init( &mutex, NULL );
+	manager->users_mutex = mutex;
+	
 	manager->cease = 0;
     manager->thread_count = 0;
     manager->last_thread = (pthread_t)0;
@@ -67,6 +71,8 @@ void destroy_manager( Management manager ) {
 	if( manager->actions != NULL ){
 		action_clean( manager->actions );
 	}
+	
+	pthread_mutex_destroy( &(manager->users_mutex ));
 
 	free( manager );
 }
@@ -77,7 +83,9 @@ void destroy_manager( Management manager ) {
  * @param user User to add
  */
 void manager_add_user( Management manager, User user ){
+    pthread_mutex_lock( &(manager->users_mutex) );
 	manager->users = add_linked_item( manager->users, user );
+    pthread_mutex_unlock( &(manager->users_mutex) );
 }
 
 /**
@@ -86,6 +94,8 @@ void manager_add_user( Management manager, User user ){
  * @param user User to remove
  */
 void manager_remove_user( Management manager, User user ) {
+
+    pthread_mutex_lock( &(manager->users_mutex) );
 	LinkedList dropped_user = remove_linked_data(
 			&(manager->users),
 			user
@@ -93,6 +103,7 @@ void manager_remove_user( Management manager, User user ) {
 		
 	// and destroy the linked item
 	destroy_linked_item( dropped_user );
+    pthread_mutex_unlock( &(manager->users_mutex) );
 }
 
 

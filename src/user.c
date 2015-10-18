@@ -41,9 +41,8 @@ User new_user( Client client ) {
 
 	// create mutex
 	pthread_mutex_t mutex;
-	pthread_mutex_init( &mutex, NULL );
-	user->mutex = mutex;
-
+	int status = pthread_mutex_init( &mutex, NULL );
+    user->mutex = mutex;
 
 	return user;
 }
@@ -60,6 +59,39 @@ void destroy_user( User user ) {
 
 }
 
+
+
+/**
+ * Save the user data
+ * @param user User to save
+ * @return 0 on failure
+ */
+int user_save( User user ) {
+
+    return 0;
+}
+
+/**
+ * Get save data for a user which is used to load the user
+ * and character
+ * @param username Name of the user to get
+ * @return Save struct pointer
+ */
+Save user_get_save( char * username ) {
+
+    return NULL;
+}
+
+/**
+ * Load user and character from a set of save data
+ * @param save Save data to load up
+ */
+User user_load_saved( Save save ) {
+
+    return NULL;
+}
+
+
 /**
  * Locks the user's mutex
  * @param user User to lock
@@ -75,3 +107,4 @@ void user_lock( User user ) {
 void user_unlock( User user ){
 	pthread_mutex_unlock( &(user->mutex) );
 }
+

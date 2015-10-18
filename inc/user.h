@@ -28,6 +28,14 @@ typedef struct user_struct {
 
 } * User;
 
+// save structure to store character information
+typedef struct save_struct {
+    char  user_name[32];
+    short character_version;
+    short password_version;
+    long  flags;
+} * Save;
+
 // create a new user
 User new_user( Client );
 
@@ -36,5 +44,13 @@ void destroy_user( User );
 // mutex funs
 void user_lock( User );
 void user_unlock( User );
+
+// save user
+int  user_save( User );
+
+// user loading functions
+Save user_get_save( char * );
+User user_load_saved( Save );
+
 
 #endif /* INC_USER_H_ */

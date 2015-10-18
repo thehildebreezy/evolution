@@ -20,9 +20,12 @@ obj/list.o: src/list.c
 
 obj/hash.o: src/hash.c
 	gcc -c -o obj/hash.o src/hash.c
+
+obj/func.o: src/func.c
+	gcc -c -o obj/func.o src/func.c
 	
-obj/util.a: obj/list.o obj/hash.o
-	ar cr obj/util.a obj/list.o obj/hash.o
+obj/util.a: obj/list.o obj/hash.o obj/func.o
+	ar cr obj/util.a obj/list.o obj/hash.o obj/func.o
 
 obj/environment.o: src/environment.o
 	gcc -c -o obj/environment.o src/environment.c

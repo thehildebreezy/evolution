@@ -42,9 +42,9 @@ Character new_character( ) {
 
 	// mutex
 	pthread_mutex_t mutex;
-	pthread_mutex_init( &mutex, NULL );
+	int status = pthread_mutex_init( &mutex, NULL );
 	character->mutex = mutex;
-
+	
 	return character;
 }
 
@@ -72,3 +72,4 @@ void char_lock( Character character ) {
 void char_unlock( Character character ) {
 	pthread_mutex_unlock( &(character->mutex) );
 }
+

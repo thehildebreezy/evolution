@@ -131,7 +131,9 @@ Action new_action( void *(*action_func)( const char *, User, Management ) ) {
  */
 void *action_look( const char *response, User user, Management manager) {
 
+    user_lock( user );
 	client_send( user->client, "You look around\n" );
+	user_unlock( user );
 	return NULL;
 }
 
@@ -150,27 +152,37 @@ void *action_shout( const char *response, User user, Management manager) {
 	LinkedList next = manager->users;
 	while( next != NULL ){
 
+        User current = (User) next->data;
+        
+        // lock this user
+        user_lock( current );
+        
 		// if it is this user
-		if( next->data == user ) {
+		if( current == user ) {
 
 			// just say its you
-			client_send( ((User)(next->data))->client, "You shout: ");
+			client_send( current->client, "You shout: ");
 
 		} else {
 
 			// send name of sender
 			client_send(
-					((User)(next->data))->client,
-					((User)(next->data))->character->name
+					current->client,
+					current->character->name
 			);
 
 			// what to do when the client is not the user
-			client_send( ((User)(next->data))->client, " shouts: " );
+			client_send( current->client, " shouts: " );
 		}
 
 		// send message
-		client_send( ((User)(next->data))->client, (char *)response);
+		client_send( current->client, (char *)response);
+		
 		next = next_linked_item( next );
+		
+		// next
+		user_unlock( current );
+		
 	}
 	
 	return NULL;

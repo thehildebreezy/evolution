@@ -12,6 +12,7 @@
 
 #include "../inc/user.h"
 #include "../inc/room.h"
+#include "../inc/func.h"
 
 /**
  * Parse the room file to create a room
@@ -34,6 +35,14 @@ Room room_from_file( char *file ){
 	room->title = "\033[1mWelcome to Olypia\033[0m";
 	room->description = "Who are you?";
 
+    room->exits = NULL;
+    
+    
+	// mutex
+	pthread_mutex_t mutex;
+	int status = pthread_mutex_init( &mutex, NULL );
+	room->mutex = mutex;
+
 	return room;
 }
 
@@ -46,7 +55,8 @@ void destroy_room( Room room ) {
 	// re activiate these when update above
 	//free( room->title );
 	//free( room->description );
-
+    pthread_mutex_destroy( &(room->mutex) );
+    
 	free( room );
 }
 
@@ -55,20 +65,58 @@ void destroy_room( Room room ) {
  * @param room Room to get desc of
  * @param user User requesting description
  * @param pointer to description buffer
- * @return number of
+ * @return length o description, -1 on fail
  */
-char *room_get_full_description( Room room, User user ) {
+int room_get_full_description( 
+    Room room, 
+    User user,
+    char **description,
+    int  *length
+) {
 
-	// temp, fix later
-	char *buffer = (char *)malloc( 2048 );
-    memset( buffer, 0, 2048 );
+    int title_len = strlen( room->title );
+    int descr_len = strlen( room->description );
 
-	strcat( buffer, room->title );
-	strcat( buffer, "\n" );
-	strcat( buffer, room->description );
-	strcat( buffer, "\n" );
+    if( title_len + descr_len >= *length ){
+    
+        // grow buffer
+        int new_len = grow_buffer( 
+            (void **)description, 
+            title_len + descr_len + 2 );
+        
+        // error check
+        if( new_len < 0 ){
+            perror("Reallocating for room description");
+            return -1;
+        }
+        
+        // re assign
+        *length = new_len;
+    }
+
+    // copy values
+	strcat( *description, room->title );
+	strcat( *description, "\n" );
+	strcat( *description, room->description );
+	strcat( *description, "\n" );
 
 
-
-	return buffer;
+	return title_len + descr_len + 2;
 }
+
+/**
+ * Locks the room struct for threaded use
+ * @param room Room to lock
+ */
+void room_lock( Room room ) {
+	pthread_mutex_lock( &(room->mutex) );
+}
+
+/**
+ * Unlocks the room for threaded use
+ * @param room Room struct to unlock
+ */
+void room_unlock( Room room ) {
+	pthread_mutex_unlock( &(room->mutex) );
+}
+

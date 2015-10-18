@@ -26,6 +26,8 @@ typedef struct evolution_management_struct {
 	// list of connected users
 	LinkedList users;
 
+    pthread_mutex_t users_mutex;
+
 	// hash table of available commands here
 	HashTable actions;
 

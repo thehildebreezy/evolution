@@ -152,12 +152,17 @@ void *user_thread( void *arg ) {
     // increase thread count
     manager_up_thread( manager, pthread_self() );
 
-	// add the user to the list of users
-	manager_add_user( manager, user );
+    // lock user for now
+    user_lock( user );
 
-	// turn client on
-	client_ok( user->client );
+	    // add the user to the list of users
+	    manager_add_user( manager, user );
 
+	    // turn client on
+	    client_ok( user->client );
+
+    // ready user for commo
+    user_unlock( user );
 
 
 
@@ -169,8 +174,22 @@ void *user_thread( void *arg ) {
 	Room login_room = room_from_file( "core/login" );
 
 	// get login
-	char *desc = room_get_full_description( login_room, user );
-
+	int desc_length = 2048;
+	char *desc = malloc( desc_length );
+	if( desc == NULL ){
+	    perror("malloc login description");
+	    destroy_room( login_room );
+	    return NULL;
+	}
+	
+	// init
+	memset( desc, 0, desc_length );
+	
+    int len = room_get_full_description( 
+        login_room,
+        user,
+        &desc,
+        &desc_length );
 
 	// send the login screen
 	client_send( user->client, desc );
@@ -179,6 +198,8 @@ void *user_thread( void *arg ) {
 	if( desc != NULL ){
 		free( desc );
 	}
+
+    // client_prompt(  )
 
 	// room only exists for this user
 	destroy_room( login_room );
@@ -230,13 +251,22 @@ void *user_thread( void *arg ) {
 	free( buff );
 
 
+
 	// remove from manager list
 	manager_remove_user( manager, user );
 
+    // lock user for this    
+	user_lock( user );
+	
 	// close and destory all structs
 	// manually manage this part
 	close_client( user->client );
 	destroy_client( user->client );
+	
+	// user gone from manager so safe to unlock a head
+	user_unlock( user );
+	
+	// now destroy
 	destroy_user( user );
 	
 	free( ((Environment)arg) );
