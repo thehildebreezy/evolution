@@ -14,6 +14,7 @@
 #include "inc/management.h"
 #include "inc/action.h"
 #include "inc/environment.h"
+#include "inc/room.h"
 
 
 
@@ -26,6 +27,9 @@ int main( int argc, char **argv )
 
 	// add actions to the manager
 	action_add_to_manager( manager );
+	
+	// add rooms to manager
+	room_add_to_manager( manager );
 
 	Server server = new_server();
 	if( start_server( server, 5555 ) < 0 ){

@@ -1,6 +1,28 @@
-[:id=0]
-[:title=Welcome back to Olypia]
-[:description]
-You begin to awaken from your slumber, your dreams slip away. You begin to remember who you are.
-Who are you?
-[:/description]
+<?xml version="1.0"?>
+<room id="0" title="Outside the gates">
+    
+    <description>
+You stand outside a very tall and intricately worked set of gates. Their purpose is a mystery, they are closed, and a road leads through them but there is nothing to be seen beyond. Ahead lies a long but bright path.
+You feel you should venture onward.    
+    </description>
+
+    <triggers>
+        <trigger id="1" />
+    </triggers>
+
+    <exits>
+        <visible>
+            <exit room="1" type="standard">
+                <state>open</state>
+                <direction>north</direction>
+            </exit>
+        </visible>
+        <hidden>
+            <exit room="2" type="command">
+                <state>open</state>
+                <command>pray</command>
+            </exit>
+        </hidden>
+    </exits>
+
+</room>

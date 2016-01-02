@@ -170,15 +170,20 @@ void *user_thread( void *arg ) {
 	 * Login screen
 	 */
 
-	// first thing we'll do is push out the login screen
-	Room login_room = room_from_file( "core/login" );
+    Room login_room = room_get( manager->rooms, 0 );    
+
+    if( login_room == NULL ){
+        printf("Error getting login room\n");
+        return 0;
+    }
 
 	// get login
 	int desc_length = 2048;
 	char *desc = malloc( desc_length );
 	if( desc == NULL ){
 	    perror("malloc login description");
-	    destroy_room( login_room );
+	    if( login_room != NULL )
+	        destroy_room( login_room );
 	    return NULL;
 	}
 	
@@ -200,12 +205,6 @@ void *user_thread( void *arg ) {
 	}
 
     // client_prompt(  )
-
-	// room only exists for this user
-	destroy_room( login_room );
-
-
-
 
 
 	// accept input

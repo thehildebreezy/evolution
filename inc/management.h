@@ -30,6 +30,9 @@ typedef struct evolution_management_struct {
 
 	// hash table of available commands here
 	HashTable actions;
+	
+	// hashtable of available rooms
+	HashTable rooms;
 
 } * Management;
 

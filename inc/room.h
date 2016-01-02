@@ -9,9 +9,36 @@
 #define INC_ROOM_H_
 
 #include <pthread.h>
+#include <libxml/xmlreader.h>
 
 #include "user.h"
 #include "list.h"
+#include "hash.h"
+#include "management.h"
+
+// define some tag identifiers
+#define TAG_ROOM 445
+#define TAG_DESCRIPTION 1188
+#define TAG_TRIGGERS 871
+#define TAG_TRIGGER 756
+#define TAG_EXITS 557
+#define TAG_EXIT 442
+#define TAG_VISIBLE 750
+#define TAG_HIDDEN 620
+#define TAG_STATE 545
+#define TAG_DIRECTION 961 
+#define TAG_COMMAND 735
+
+#define NODE_ELEMENT 1
+#define NODE_ENDELEMENT 15
+
+typedef enum tag_context_enum {
+    TAG_CONTEXT_ROOM,
+    TAG_CONTEXT_TRIGGERS,
+    TAG_CONTEXT_EXITS,
+    TAG_CONTEXT_EXIT_VISIBLE,
+    TAG_CONTEXT_EXIT_HIDDEN,
+} TAG_CONTEXT;
 
 typedef enum exit_type_enum {
     EXIT_TYPE_SPECIAL,
@@ -64,14 +91,34 @@ typedef struct exit_struct {
     Room room;
 } * Exit;
 
+// add rooms to the manager
+void room_add_to_manager( Management );
+
 // parse a room file and return a room
 Room room_from_file( char * );
+
+// update a room based on a node
+int room_parse_tag( Room, const xmlChar *, xmlTextReaderPtr );
+
+// read in room tag info
+int room_tag_room( Room, xmlTextReaderPtr );
 
 // destroy a room
 void destroy_room( Room );
 
+void room_clean( HashTable );
+void room_free( void * );
+
+// get a room by id
+Room room_get( HashTable, unsigned long );
+
+
 void room_lock( Room );
 void room_unlock( Room );
+
+// get individual descriptions
+char *room_get_title( Room );
+char *room_get_description( Room );
 
 // get the full description of the room
 int room_get_full_description( Room, User, char **, int * );

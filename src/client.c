@@ -147,7 +147,7 @@ int client_recv( Client client, char **message, int *length ) {
 	    // full buffer, grow
 	    if( rx == *length ){
 	    
-	        int grow_length = grow_buffer( message, *length+256 );
+	        int grow_length = grow_buffer( (void **)message, *length+256 );
 	        if( grow_length < 0 ){
                 perror("Error realloc client recv");
 	            break;

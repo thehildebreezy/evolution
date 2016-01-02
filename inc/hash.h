@@ -51,6 +51,11 @@ HashTable create_hash_table( int init_size,
  */
 int destroy_hash_table( HashTable table );
 
+/* Frees all the memory in a hash table including the data stored with special func
+ * Returns -1 on failure
+ */
+int destroy_hash_table_func( HashTable table, void dest_func (void *) );
+
 /* Frees all the memory in a hash table including the data stored
  * Returns -1 on failure
  */
@@ -95,5 +100,13 @@ unsigned long string_hash_djb2( void *data );
 
 /* comares 2 strings for the hash */
 int string_comp_func( void *data1, void *data2 );
+
+
+/* integer hashing fucntion
+ */
+unsigned long int_hash( void *data );
+
+/* comares 2 integers for the hash */
+int int_comp_func( void *data1, void *data2 );
 
 #endif /* INC_HASH_H_ */

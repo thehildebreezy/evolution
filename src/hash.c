@@ -78,6 +78,32 @@ int destroy_hash_table( HashTable table )
 	return 0;
 }
 
+// destroy a hash table with func
+// 0 on success, -1 failure
+int destroy_hash_table_func( 
+    HashTable table, void dest_func (void *) )
+{
+	int i = 0;
+	for( ; i < table->num_buckets; i++ ){
+		// loop over all buckets and destroy links
+		HashTableLink next = table->table[i];
+		while( next != NULL ){
+			HashTableLink destroy = next;
+			next = next->next;
+			dest_func( destroy->data );
+			free( destroy );
+		}
+	}
+
+	// free buckets table
+	free(table->table);
+	
+	free( table );
+
+	return 0;
+}
+
+
 // destroy a hash table
 // 0 on success, -1 failure
 int destroy_hash_table_data( HashTable table )
@@ -265,3 +291,24 @@ int string_comp_func( void *data1, void *data2 )
 {
 	return strcmp( (const char *)data1, (const char *)data2 );
 }
+
+
+/** integer hashing fucntion with 254 tables
+ * @param data integer value to hash
+ */
+unsigned long int_hash( void *data ) 
+{
+    return (unsigned long) *((unsigned long *)data);
+}
+
+/** comares 2 integers for the hash 
+ * @param data1 first data object to compare
+ * @param data2 second data object to compare
+ * @return 0 if same, other if different
+ */
+int int_comp_func( void *data1, void *data2 ) 
+{
+    return (unsigned long)*((unsigned long *)data1) - (unsigned long)*((unsigned long *)data2);
+}
+
+
