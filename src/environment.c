@@ -177,15 +177,11 @@ void *user_thread( void *arg ) {
         return 0;
     }
 
+    char_set_room( user->character, login_room );
+
 	// get login
 	int desc_length = 2048;
 	char *desc = malloc( desc_length );
-	if( desc == NULL ){
-	    perror("malloc login description");
-	    if( login_room != NULL )
-	        destroy_room( login_room );
-	    return NULL;
-	}
 	
 	// init
 	memset( desc, 0, desc_length );

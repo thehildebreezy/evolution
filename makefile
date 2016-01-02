@@ -31,16 +31,16 @@ obj/environment.o: src/environment.c
 	gcc -c -o obj/environment.o `xml2-config --cflags` src/environment.c `xml2-config --libs`
 
 obj/character.o: src/character.c
-	gcc -c -o obj/character.o src/character.c
+	gcc -c -o obj/character.o `xml2-config --cflags` src/character.c `xml2-config --libs`
 	
 obj/stats.o: src/stats.c
 	gcc -c -o obj/stats.o src/stats.c
 
 obj/user.o: src/user.c
-	gcc -c -o obj/user.o src/user.c
+	gcc -c -o obj/user.o `xml2-config --cflags` src/user.c `xml2-config --libs`
 	
 obj/action.o: src/action.c
-	gcc -c -o obj/action.o src/action.c
+	gcc -c -o obj/action.o `xml2-config --cflags` src/action.c `xml2-config --cflags` 
 	
 obj/room.o: src/room.c
 	gcc -c -o obj/room.o `xml2-config --cflags` src/room.c `xml2-config --libs`

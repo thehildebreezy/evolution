@@ -18,7 +18,7 @@ typedef struct user_struct *User;
 #include "client.h"
 #include "user.h"
 #include "stats.h"
-
+#include "room.h"
 
 // Structure
 typedef struct character_struct {
@@ -27,10 +27,12 @@ typedef struct character_struct {
 	char name[32];
 
 	// character location
-	unsigned long location;
+	// unsigned long location;
+	Room room;
 
 	// character stats
 	Stats stats;
+	
 
 	// if it has a user it will be associated here
 	User user;
@@ -47,6 +49,14 @@ typedef struct character_struct {
 
 Character new_character( );
 void destroy_character( Character );
+
+// get character room
+Room char_get_room( Character );
+
+
+// set character room
+void char_set_room( Character, Room );
+
 
 // mutex funcs
 void char_lock( Character );

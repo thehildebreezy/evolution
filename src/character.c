@@ -14,6 +14,7 @@
 
 #include "../inc/character.h"
 #include "../inc/client.h"
+#include "../inc/room.h"
 
 /**
  * Create a new character struct
@@ -38,7 +39,9 @@ Character new_character( ) {
 	character->user = NULL;
 
 	strcpy(character->name, "Newman");
-	character->location = 0;
+	
+	character->room = NULL;
+	//character->location = 0;
 
 	// mutex
 	pthread_mutex_t mutex;
@@ -55,6 +58,29 @@ Character new_character( ) {
 void destroy_character( Character character ) {
 	pthread_mutex_destroy( &(character->mutex) );
 	free( character );
+}
+
+/**
+ * Get the room the character is in
+ * @param character character to get room for
+ * @return the room character is in
+ */
+Room char_get_room( Character character )
+{
+    return character->room;
+}
+
+
+/**
+ * Get the room the character is in
+ * @param character character to set room for
+ * @param room the room character is to be in
+ */
+void char_set_room( Character character, Room room )
+{
+    char_lock( character );
+    character->room = room;
+    char_unlock( character );
 }
 
 /**

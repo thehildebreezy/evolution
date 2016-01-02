@@ -150,7 +150,30 @@ void *action_exit( const char *response, User user, Management manager)
 void *action_look( const char *response, User user, Management manager) {
 
     user_lock( user );
-	client_send( user->client, "You look around\n" );
+	
+	Room current = char_get_room( user->character );
+	
+	// get login
+	int desc_length = 2048;
+	char *desc = malloc( desc_length );
+	
+	// init
+	memset( desc, 0, desc_length );
+	
+    int len = room_get_full_description( 
+        current,
+        user,
+        &desc,
+        &desc_length );
+
+	// send the login screen
+	client_send( user->client, desc );
+
+	// free up the buffer
+	if( desc != NULL ){
+		free( desc );
+	}
+	
 	user_unlock( user );
 	return NULL;
 }
