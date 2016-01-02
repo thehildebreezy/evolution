@@ -174,7 +174,7 @@ void *user_thread( void *arg ) {
 
     if( login_room == NULL ){
         printf("Error getting login room\n");
-        return 0;
+        //return 0;
     }
 
     char_set_room( user->character, login_room );
@@ -193,7 +193,8 @@ void *user_thread( void *arg ) {
         &desc_length );
 
 	// send the login screen
-	client_send( user->client, desc );
+	if( len > 0 )
+	    client_send( user->client, desc );
 
 	// free up the buffer
 	if( desc != NULL ){

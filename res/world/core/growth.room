@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<room id="2" title="The edge of the forest">
+    
+    <description>
+The forest falls away behind you and the path continues out to the east. The hills disappear into the bright sun. You know that to continue from here is to continue on into your new life; whatever you decide to do, whatever you decide to be you may choose.
+For better or worse the choice is yours. Choose well.
+    </description>
+
+    <exits>
+        <visible>
+            <exit room="3" type="standard">
+                <state>open</state>
+                <direction>north</direction>
+            </exit>
+        </visible>
+    </exits>
+
+</room>

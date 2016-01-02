@@ -16,6 +16,9 @@
 #include "../inc/room.h"
 #include "../inc/func.h"
 #include "../inc/hash.h"
+#include "../inc/management.h"
+
+
 
 /**
  * Add the rooms to the manager
@@ -23,8 +26,216 @@
  */
 void room_add_to_manager( Management manager )
 {
-    Room room1 = room_from_file("res/world/core/login.room");
-	hash_table_add( manager->rooms, &(room1->id), room1);
+
+    // load the rooms list
+    
+    // start text reader
+    xmlTextReaderPtr reader;
+    reader = xmlReaderForFile( "res/world.xml", NULL, 0 );
+    
+    // check for validity
+    if( reader != NULL ) {
+    
+        
+        // check reader status
+        int reader_status = xmlTextReaderRead( reader );
+        while( reader_status == 1 ) {
+            
+            // initialize values
+            const xmlChar *nameT;
+            char *name;
+    
+            nameT = xmlTextReaderConstName(reader);
+            name = quick_copy( (char *)nameT );
+    
+            if( name != NULL ){
+            
+                // process level
+                // look for world level
+                
+                // look for continent level
+                if( quick_comp( (char *)name, "continent" ) == 0 ){
+                
+                    const xmlChar *src = xmlTextReaderGetAttribute( reader, "src" );
+                    //tmpPtr = attr;
+                    if( src != NULL ){
+                        // attribute check
+                        
+                        room_process_continent( manager, reader, src );
+                        
+                        // free attr
+                        xmlFree( (xmlChar *)  src );
+                    }
+                    
+                    
+                }
+                
+                //if( name != NULL )
+                    xmlFree( (xmlChar *)  name );
+            }
+            
+            
+            // update reader status
+            reader_status = xmlTextReaderRead( reader );
+        }
+        
+        
+        // free the reader object
+        xmlFreeTextReader( reader );
+        
+    } else {
+        printf("error loading rooms\n");
+        return;
+    }
+    
+
+    //Room room1 = room_from_file("res/world/core/login.room");
+	//hash_table_add( manager->rooms, &(room1->id), room1);
+}
+
+/**
+ * Process a continent node of a world file
+ * @param reader The reader to process from
+ * @param src the source folder to draw continent information from
+ */
+void room_process_continent( Management manager, xmlTextReaderPtr reader, const xmlChar *src )
+{
+    // check reader status
+    int reader_status = xmlTextReaderRead( reader );
+    while( reader_status == 1 ) {
+        // initialize values
+        const xmlChar *nameT;
+        char *name;
+
+        nameT = xmlTextReaderConstName(reader);
+        name = quick_copy( (char *) nameT );
+        
+        if( name != NULL ){
+            
+            // reader stuff
+            int node_type = xmlTextReaderNodeType(reader);
+            
+            if( quick_comp( (char *)name, "continent" ) == 0 && 
+                node_type == NODE_ENDELEMENT ) {
+            
+                free( name );    
+                return;
+            }
+            
+            // now look for areas
+            if( quick_comp( (char *)name, "area" ) == 0 ){
+            
+                const xmlChar *attr = xmlTextReaderGetAttribute( reader, "area-id" );
+                if( attr != NULL ){
+                    // attribute check
+                    int areaid = atoi( attr );
+                    
+                    room_process_area( manager, reader, src, (unsigned long)areaid );
+                    
+                    // free attr
+                    xmlFree( (xmlChar *)  attr );
+                }
+            }
+            
+            free( name );
+        }
+        
+        reader_status = xmlTextReaderRead( reader );
+    }
+}
+
+/**
+ * Process the area node of the world
+ * @param reader the reader to process the area from
+ * @param src the source folder for the continent
+ * @param areaid the id of the area 
+ */
+void room_process_area( Management manager, xmlTextReaderPtr reader, const xmlChar *src, unsigned long areaid )
+{
+    
+    // check reader status
+    int reader_status = xmlTextReaderRead( reader );
+    while( reader_status == 1 ) {
+        // initialize values
+        const xmlChar *nameT, *value;
+        char *name;
+
+        nameT = xmlTextReaderConstName(reader);
+        name = quick_copy( (char *)nameT );
+        
+        
+        if( name != NULL ){
+            
+            // reader stuff
+            int node_type = xmlTextReaderNodeType(reader);
+            
+            
+            if( quick_comp( (char *)name, "area" ) == 0 && 
+                node_type == NODE_ENDELEMENT ) {
+                
+                free( name );
+                return;
+            }
+            
+            
+            // now look for areas
+            if( quick_comp( (char *)name, "room" ) == 0 ){
+            
+                // now we have to read until we find a value
+                const xmlChar *value = NULL;
+                
+                reader_status = xmlTextReaderRead( reader );
+                
+                while( reader_status == 1 && value == NULL ){
+                
+                    int node_type = xmlTextReaderNodeType( reader );
+                    
+                    if( node_type == NODE_ENDELEMENT ) break;
+                    
+                    if( node_type == NODE_TEXT ){
+                        value = xmlTextReaderConstValue( reader );
+                    }
+                    
+                    if( value != NULL ){
+                    
+                    
+	                    printf("%s\n",value);
+                        
+                        // length
+                        unsigned long length = strlen(src) + strlen(value) + 17;
+                        
+                        // room file build
+                        char *room_file = (char *)malloc( length );
+                        strcpy( room_file, "res/world/" );
+                        strcat( room_file, src );
+                        strcat( room_file, "/" );
+                        strcat( room_file, value );
+                        strcat( room_file, ".room" );
+                        
+                        // close up room file
+                        room_file[length-1] = 0;
+                        
+                        // load room
+                        
+                        Room room = room_from_file(room_file);
+	                    hash_table_add( manager->rooms, &(room->id), room);
+                        
+                        // free the room file string
+                        free( room_file );
+                        
+                    }
+                    
+                    reader_status = xmlTextReaderRead( reader );
+                }
+                
+                
+            }
+            
+            free( name );
+        }
+        
+        reader_status = xmlTextReaderRead( reader );
+    }
 }
 
 /**
@@ -45,6 +256,8 @@ Room room_from_file( char *file ){
 	memset( room, 0, sizeof( struct room_struct ) );
 
 	room->id = 0;
+	
+	room->area_id = 0;
 	
 	// init values to nothing
 	room->title = NULL;
@@ -67,17 +280,19 @@ Room room_from_file( char *file ){
         while( reader_status == 1 ) {
             
             // initialize values
-            const xmlChar *name;
-    
-            name = xmlTextReaderConstName(reader);
-            if( name == NULL ){
-                // try next
-                continue;
+            const xmlChar *nameT;
+            char *name;
+            
+            nameT = xmlTextReaderConstName(reader);
+            name = quick_copy( (char *) nameT );
+            
+            if( name != NULL ){
+            
+                // parse the room tag
+                room_parse_tag( room, name, reader );
+                
+                free( name );
             }
-            
-            
-            // parse the room tag
-            room_parse_tag( room, name, reader );
             
             // update reader status
             reader_status = xmlTextReaderRead( reader );
@@ -121,7 +336,7 @@ int room_parse_tag(
     int depth = xmlTextReaderDepth(reader);
     int node_type = xmlTextReaderNodeType(reader);
     
-    if( node_type == 15 ) return 0;
+    if( node_type == NODE_ENDELEMENT ) return 0;
     
     int empty = xmlTextReaderIsEmptyElement(reader);
     int has_value = xmlTextReaderHasValue(reader);
@@ -164,11 +379,11 @@ int room_tag_room( Room room, xmlTextReaderPtr reader )
 
     const xmlChar *attr = xmlTextReaderGetAttribute( reader, "id" );
     if( attr != NULL ){
-        unsigned long id = (unsigned long) atoi( attr );
+        int id = atoi( attr );
         if( id != INT_MAX && id != INT_MIN ){
-            room->id = id;
+            room->id = (unsigned long) id;
         }
-        xmlFree( (xmlChar *) attr );
+        xmlFree( (xmlChar *)  (xmlChar *) attr );
         //free( (xmlChar *)attr );
     }
     
@@ -250,6 +465,7 @@ char *room_get_title( Room room )
  */
 char *room_get_description( Room room )
 {
+    if( room == NULL) return NULL;
     return room->description;
 }
 
@@ -267,6 +483,8 @@ int room_get_full_description(
     int  *length
 ) {
 
+    if( room == NULL ) return 0;
+    
     char *title = room_get_title( room );
     char *desc = room_get_description( room );
 

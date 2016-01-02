@@ -31,6 +31,11 @@
 
 #define NODE_ELEMENT 1
 #define NODE_ENDELEMENT 15
+#define NODE_TEXT 3
+
+// forward declaration
+typedef struct evolution_management_struct * Management;
+
 
 typedef enum tag_context_enum {
     TAG_CONTEXT_ROOM,
@@ -71,6 +76,9 @@ typedef struct room_struct {
 	// id of the room
 	unsigned long id;
 
+    // room area id
+    unsigned long area_id;
+
 	// room title
 	char *title;
 
@@ -93,6 +101,12 @@ typedef struct exit_struct {
 
 // add rooms to the manager
 void room_add_to_manager( Management );
+
+// process a continent
+void room_process_continent( Management, xmlTextReaderPtr, const xmlChar * );
+
+// process area
+void room_process_area( Management, xmlTextReaderPtr, const xmlChar *, unsigned long  );
 
 // parse a room file and return a room
 Room room_from_file( char * );

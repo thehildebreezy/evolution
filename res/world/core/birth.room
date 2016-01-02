@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<room id="1" title="A surreal clearing">
+    
+    <description>
+There is a clearing in the woods. Light peaks through the tree tops and shines in rays down onto the light grass below. It feels like something surreal, something not of the mortal world. 
+You start to realize what you are.
+    </description>
+
+    <exits>
+        <visible>
+            <exit room="2" type="standard">
+                <state>open</state>
+                <direction>north</direction>
+            </exit>
+        </visible>
+    </exits>
+
+</room>

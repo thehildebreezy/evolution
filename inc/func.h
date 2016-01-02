@@ -10,4 +10,8 @@
 
 int grow_buffer( void **, int );
 
+int quick_comp( char *, char * );
+
+char *quick_copy( char * );
+
 #endif /* INC_FUNC_H_ */

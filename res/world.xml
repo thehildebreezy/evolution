@@ -1,0 +1,13 @@
+<world name="Aerith">
+    
+    <continent src="core" name="Tyrol">
+    
+        <area name="start" area-id="0">
+            <room>login</room>
+            <room>birth</room>
+            <room>growth</room>
+        </area>
+    
+    </continent>
+    
+</world>
