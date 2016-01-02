@@ -34,6 +34,9 @@ int action_parse_response(
 // create a new action
 Action new_action( void *(*action_func)( const char *, User, Management ) );
 
+// exit action
+void *action_exit( const char *, User, Management);
+
 // look action
 void *action_look( const char *, User, Management);
 

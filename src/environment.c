@@ -219,7 +219,7 @@ void *user_thread( void *arg ) {
 	}
 
 	// user response loop
-	while( manager->cease != 1 ){
+	while( manager->cease != 1 && (user->flags & USER_FLAG_EXIT) == 0 ){
 
 		// receive response from client
 		int length = client_recv( 

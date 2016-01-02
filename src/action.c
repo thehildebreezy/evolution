@@ -23,6 +23,10 @@
  */
 void action_add_to_manager( Management manager ) {
 
+	// add exit action to actions table
+	Action exit = new_action( action_exit );
+	hash_table_add( manager->actions, (void *)"exit", exit);
+
 	// add look action to actions table
 	Action look = new_action( action_look );
 	hash_table_add( manager->actions, (void *)"look", look);
@@ -121,6 +125,20 @@ Action new_action( void *(*action_func)( const char *, User, Management ) ) {
 	action->action_func = action_func;
 
 	return action;
+}
+
+/**
+ * Exit from the game
+ * @param response message following action command
+ * @param user User making action request
+ * @param manager Global resource manager
+ */
+void *action_exit( const char *response, User user, Management manager) 
+{
+    user_lock( user );
+	user_exit( user );
+	user_unlock( user );
+	return NULL;
 }
 
 /**

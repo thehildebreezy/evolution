@@ -34,6 +34,8 @@ User new_user( Client client ) {
 
 	user->client = client;
 
+    user->flags = 0;
+
 	// create character
 	Character character = new_character();
 	user->character = character;
@@ -60,6 +62,16 @@ void destroy_user( User user ) {
 }
 
 
+/**
+ * Exit the user by setting a flag
+ * @param user the user to let exit
+ * @return 0 on success
+ */
+int user_exit( User user )
+{
+    user->flags |= USER_FLAG_EXIT;
+    return 0;
+}
 
 /**
  * Save the user data

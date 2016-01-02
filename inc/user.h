@@ -18,6 +18,8 @@ typedef struct character_struct *Character;
 #include "client.h"
 #include "pthread.h"
 
+#define USER_FLAG_EXIT 1 << 0
+
 
 // need to pre define this before including character
 typedef struct user_struct {
@@ -25,6 +27,7 @@ typedef struct user_struct {
 	Character character;
 	Client client;
 	pthread_mutex_t mutex;
+    unsigned char flags;
 
 } * User;
 
@@ -33,7 +36,7 @@ typedef struct save_struct {
     char  user_name[32];
     short character_version;
     short password_version;
-    long  flags;
+    unsigned long  flags;
 } * Save;
 
 // create a new user
@@ -47,6 +50,9 @@ void user_unlock( User );
 
 // save user
 int  user_save( User );
+
+// set user to exit
+int user_exit( User );
 
 // user loading functions
 Save user_get_save( char * );

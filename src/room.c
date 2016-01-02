@@ -219,7 +219,12 @@ void destroy_room( Room room ) {
 	free( room );
 }
 
-
+/**
+ * Get the room structure for the room id
+ * @param rooms the hashtable of rooms from the manager
+ * @param id the id of the room to grab
+ * @param Room structure of given room
+ */
 Room room_get( HashTable rooms, unsigned long id )
 {
     unsigned long tmp = id;
