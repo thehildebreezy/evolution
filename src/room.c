@@ -15,6 +15,7 @@
 #include "../inc/user.h"
 #include "../inc/room.h"
 #include "../inc/func.h"
+#include "../inc/list.h"
 #include "../inc/hash.h"
 #include "../inc/management.h"
 
@@ -238,6 +239,17 @@ void room_process_area( Management manager, xmlTextReaderPtr reader, const xmlCh
     }
 }
 
+unsigned long tag_value( char *tag )
+{
+    unsigned int tagv = 0;
+    unsigned int tag_len = strlen( tag );
+    int i = 0;
+    for( ; i<tag_len; i++ ){
+        tagv += tag[i];
+    }
+    return tagv;
+}
+
 /**
  * Parse the room file to create a room
  * @param file File to parse for the room
@@ -345,19 +357,29 @@ int room_parse_tag(
     
     // important stuff here
     // compute tag numerical value
-    unsigned int tag_value = 0;
-    unsigned int tag_len = strlen( tag );
-    int i = 0;
-    for( ; i<tag_len; i++ ){
-        tag_value += tag[i];
-    }
+    unsigned int tagv = tag_value( (char *)tag );
     
-    switch (tag_value) {
+    switch (tagv) {
     case TAG_ROOM:
         
         if( depth == 0 && node_type == NODE_ELEMENT ) {
             // read room id, etc
             room_tag_room( room, reader );
+        }
+        break;
+    case TAG_DESCRIPTION:
+    
+        if( depth == 1 && node_type == NODE_ELEMENT ) {
+            room_tag_description( room, reader );
+        }
+        break;
+    case TAG_EXITS:
+            
+        if( depth == 1 && node_type == NODE_ELEMENT ) {
+            // room_tag_exits( room, reader );
+            // look for hidden / visible
+            room_tag_exits( room, reader );
+            
         }
         break;
     default:
@@ -383,7 +405,7 @@ int room_tag_room( Room room, xmlTextReaderPtr reader )
         if( id != INT_MAX && id != INT_MIN ){
             room->id = (unsigned long) id;
         }
-        xmlFree( (xmlChar *)  (xmlChar *) attr );
+        xmlFree( (xmlChar *) attr );
         //free( (xmlChar *)attr );
     }
     
@@ -391,6 +413,299 @@ int room_tag_room( Room room, xmlTextReaderPtr reader )
     if( attr != NULL ){
         room->title = (char *)attr;
     }
+    
+    return 0;
+}
+
+
+/**
+ * Load room description from file
+ * @param room The room struct to update
+ * @param reader the xml reader to read from
+ * @return 0 on success, -1 on failure
+ */
+int room_tag_description( Room room, xmlTextReaderPtr reader )
+{
+    int reader_status = xmlTextReaderRead( reader );
+    const xmlChar *value = NULL;
+    
+    while( reader_status == 1 && value == NULL ){
+    
+        int node_type = xmlTextReaderNodeType( reader );
+        
+        if( node_type == NODE_ENDELEMENT ) break;
+        
+        if( node_type == NODE_TEXT ){
+            value = xmlTextReaderConstValue( reader );
+        }
+        
+        // found value
+        if( value != NULL ){
+        
+            // strlen
+            int vlen = strlen( value );
+            
+            // description holder
+            char *desc = (char *)malloc( vlen );
+        
+            int len = trimwhitespace( desc, vlen, value );
+            if( len > 0 ){
+                room->description = desc;
+            }
+            break;
+        }
+        
+        reader_status = xmlTextReaderRead( reader );
+    }
+    
+    return 0;
+}
+
+/**
+ * Load room exits from file
+ * @param room The room struct to update
+ * @param reader the xml reader to read from
+ * @return 0 on success, -1 on failure
+ */
+int room_tag_exits( Room room, xmlTextReaderPtr reader )
+{
+    int reader_status = xmlTextReaderRead( reader );
+    
+    while( reader_status == 1 ){
+    
+        // grab name
+        const xmlChar *name = xmlTextReaderConstName( reader );
+        unsigned long tagv = tag_value( (char *)name );
+        
+        int node_type = xmlTextReaderNodeType( reader );
+        
+        if( tagv == TAG_EXITS && 
+            node_type == NODE_ENDELEMENT ) break;
+        
+        switch( tagv ){
+        case TAG_VISIBLE:
+            room_tag_exits_visible( room, reader );
+            break;
+        case TAG_HIDDEN:
+            room_tag_exits_hidden( room, reader );
+            break;
+        default:
+            break;
+        }
+        
+        reader_status = xmlTextReaderRead( reader );
+    }
+    
+    return 0;
+}
+
+
+/**
+ * Load room exits from file
+ * @param room The room struct to update
+ * @param reader the xml reader to read from
+ * @return 0 on success, -1 on failure
+ */
+int room_tag_exits_visible( Room room, xmlTextReaderPtr reader )
+{
+    
+    int reader_status = xmlTextReaderRead( reader );
+    
+    while( reader_status == 1 ){
+    
+        // grab name
+        const xmlChar *name = xmlTextReaderConstName( reader );
+        unsigned long tagv = tag_value( (char *)name );
+        
+        int node_type = xmlTextReaderNodeType( reader );
+        
+        if( tagv == TAG_VISIBLE && 
+            node_type == NODE_ENDELEMENT ) break;
+        
+        if( tagv == TAG_EXIT )
+            room_tag_visible_exit( room, reader );
+        
+        reader_status = xmlTextReaderRead( reader );
+    }
+    
+    return 0;
+}
+
+/**
+ * Load room exits from file
+ * @param room The room struct to update
+ * @param reader the xml reader to read from
+ * @return 0 on success, -1 on failure
+ */
+int room_tag_exits_hidden( Room room, xmlTextReaderPtr reader )
+{
+    
+    int reader_status = xmlTextReaderRead( reader );
+    
+    while( reader_status == 1 ){
+    
+        // grab name
+        const xmlChar *name = xmlTextReaderConstName( reader );
+        unsigned long tagv = tag_value( (char *)name );
+        
+        int node_type = xmlTextReaderNodeType( reader );
+        
+        if( tagv == TAG_HIDDEN && 
+            node_type == NODE_ENDELEMENT ) break;
+        
+        if( tagv == TAG_EXIT )
+            room_tag_hidden_exit( room, reader );
+        
+        reader_status = xmlTextReaderRead( reader );
+    }
+    
+    return 0;
+}
+
+/**
+ * Load a visible exit
+ * @param room The room struct to update
+ * @param reader the xml reader to read from
+ * @return 0 on success, -1 on failure
+ */
+int room_tag_visible_exit( Room room, xmlTextReaderPtr reader )
+{
+
+    // get the room id to load
+    const xmlChar *roomAttr = xmlTextReaderGetAttribute( reader, "room" );
+    
+    // if no room drop it
+    if( roomAttr == NULL ) return -1;
+    
+    // get room id
+    int roomid = atoi(roomAttr);
+    if( roomid == INT_MIN || roomid == INT_MAX ){
+        xmlFree( (xmlChar *) roomAttr );
+        return -1;
+    }
+    
+    xmlFree( (xmlChar *) roomAttr );
+    
+    // new exit
+    Exit exit = new_exit( (unsigned long)roomid );
+    if( exit == NULL ){
+    
+        xmlFree( (xmlChar *) roomAttr );
+        return -1;
+    }
+    
+    // look for type
+    const xmlChar *type = xmlTextReaderGetAttribute( reader, "type" );
+    
+    
+    
+    int reader_status = xmlTextReaderRead( reader );
+    
+    // get attributes
+    
+    
+    while( reader_status == 1 ){
+    
+        // grab name
+        const xmlChar *name = xmlTextReaderConstName( reader );
+        unsigned long tagv = tag_value( (char *)name );
+        
+        int node_type = xmlTextReaderNodeType( reader );
+        
+        if( tagv == TAG_EXIT && 
+            node_type == NODE_ENDELEMENT ) break;
+        
+        unsigned long valv = 0;
+        
+        switch( tagv ){
+        case TAG_STATE: ;
+            const xmlChar *state = room_tag_get_value( reader );
+            valv = tag_value( (char *) state );
+            
+            switch( valv ){
+            case TAG_VALUE_OPEN:
+                exit_open( exit );
+                break;
+            default:
+                exit_open( exit );
+                break;
+            }
+            
+            break;
+        case TAG_DIRECTION: ;
+            const xmlChar *dir = room_tag_get_value( reader );
+            valv = tag_value( (char *) state );
+            
+            switch( valv ){
+            case TAG_VALUE_NORTH:
+                exit->type = EXIT_TYPE_N;
+                break;
+            default:
+                exit->type = EXIT_TYPE_SPECIAL;
+                break;
+            }
+            
+            break;
+        default:
+            break;
+        }
+        
+        reader_status = xmlTextReaderRead( reader );
+    }
+    
+    if( type != NULL )
+        xmlFree( (xmlChar *) type );    
+    
+    if( room->exits == NULL ){
+        room->exits = new_linked_list( exit );
+    } else {
+        room->exits = add_linked_item( room->exits, exit );
+    }
+    
+    return 0;
+}
+
+/**
+ * Load room hidden exit
+ * @param room The room struct to update
+ * @param reader the xml reader to read from
+ * @return 0 on success, -1 on failure
+ */
+int room_tag_hidden_exit( Room room, xmlTextReaderPtr reader )
+{
+    // return room_tag_visible
+}
+
+/**
+ * Get the value of a tag
+ * @param reader xml reader to get from
+ * @return NULL on fail, value on success
+ */
+const xmlChar *room_tag_get_value( xmlTextReaderPtr reader )
+{
+
+    int reader_status = xmlTextReaderRead( reader );
+    const xmlChar *value = NULL;
+    
+    while( reader_status == 1 && value == NULL ){
+    
+        int node_type = xmlTextReaderNodeType( reader );
+        
+        if( node_type == NODE_ENDELEMENT ) return NULL;
+        
+        if( node_type == NODE_TEXT ){
+            value = xmlTextReaderConstValue( reader );
+        }
+        
+        // found value
+        if( value != NULL ){
+        
+            return value;
+        }
+        
+        reader_status = xmlTextReaderRead( reader );
+    }
+    return NULL;
 }
 
 
@@ -428,6 +743,11 @@ void destroy_room( Room room ) {
         free( room->title );
     if( room->description != NULL )
         free( room->description );
+        
+    if( room->exits != NULL ){
+        destroy_linked_list_func( room->exits, (void (*)(void *))destroy_exit );
+    }
+        
         
     pthread_mutex_destroy( &(room->mutex) );
     
@@ -536,4 +856,86 @@ void room_lock( Room room ) {
 void room_unlock( Room room ) {
 	pthread_mutex_unlock( &(room->mutex) );
 }
+
+
+/* ===========================================================
+ * Exit functions
+ */
+ 
+/**
+ * Create a new exit structure
+ * @param type type of exit this is
+ * @param status of the exit
+ * @param roomid id of the room of exit
+ * @param cmd any special command to use
+ * @return the new exit struct or null on failure
+ */
+Exit new_exit( unsigned long roomid )
+{
+    Exit exit = (Exit)malloc( sizeof(struct exit_struct) );
+    if( exit == NULL ){
+        return NULL;
+    }
+    
+    exit->type = 0;
+    exit->status = 0;
+    exit->roomid = roomid;
+    exit->cmd = NULL;
+    
+    return exit;
+}
+
+/**
+ * Opens an exit
+ * @param exit exit to open
+ */
+void exit_open( Exit exit )
+{
+    // set status to open
+    exit->status &= ~(EXIT_STATUS_CLOSED);
+}
+
+/**
+ * Closes an exit
+ * @param exit exit to close
+ */
+void exit_close( Exit exit )
+{
+    // set status to closed
+    exit->status |= EXIT_STATUS_CLOSED;
+}
+
+/**
+ * Locks an exit
+ * @param exit exit to lock
+ */
+void exit_lock( Exit exit )
+{
+    exit->status |= EXIT_STATUS_LOCKED;
+}
+
+/**
+ * Unlocks an exit
+ * @param exit exit to unlock
+ */
+void exit_unlock( Exit exit )
+{
+    exit->status &= ~(EXIT_STATUS_LOCKED);
+}
+
+
+
+/**
+ * Destroy the exit object
+ * @param exit the exit structure to free
+ */
+void destroy_exit( Exit exit )
+{
+    if( exit != NULL && exit->cmd != NULL );
+        free( exit->cmd );
+    if( exit != NULL );
+        free( exit );
+}
+
+
 

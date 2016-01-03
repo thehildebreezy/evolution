@@ -29,6 +29,10 @@
 #define TAG_DIRECTION 961 
 #define TAG_COMMAND 735
 
+#define TAG_VALUE_OPEN 434
+#define TAG_VALUE_NORTH 555
+
+
 #define NODE_ELEMENT 1
 #define NODE_ENDELEMENT 15
 #define NODE_TEXT 3
@@ -61,6 +65,14 @@ typedef enum exit_type_enum {
     EXIT_TYPE_OUT
 } EXIT_TYPE;
 
+
+#define EXIT_STATUS char
+#define EXIT_STATUS_CLOSED  1
+#define EXIT_STATUS_LOCKED  1 << 1
+#define EXIT_STATUS_HIDDEN  1 << 2
+#define EXIT_STATUS_SPECIAL 1 << 3
+
+/*
 typedef enum exit_status_enum {
     EXIT_STATUS_NONE,
     EXIT_STATUS_SPECIAL,
@@ -69,6 +81,7 @@ typedef enum exit_status_enum {
     EXIT_STATUS_LOCKED,
     EXIT_STATUS_UNK
 } EXIT_STATUS;
+*/
 
 // room structure
 typedef struct room_struct {
@@ -96,7 +109,9 @@ typedef struct room_struct {
 typedef struct exit_struct {
     EXIT_TYPE type;
     EXIT_STATUS status;
-    Room room;
+    //Room room;
+    unsigned long roomid;
+    char *cmd;
 } * Exit;
 
 // add rooms to the manager
@@ -114,8 +129,33 @@ Room room_from_file( char * );
 // update a room based on a node
 int room_parse_tag( Room, const xmlChar *, xmlTextReaderPtr );
 
+/* --------------------------------------
+ * Room tag functions
+ */
+
 // read in room tag info
 int room_tag_room( Room, xmlTextReaderPtr );
+
+// int read in description tag
+int room_tag_description( Room, xmlTextReaderPtr );
+
+// int read in exits tag
+int room_tag_exits( Room, xmlTextReaderPtr );
+
+// int read in visible exits tag
+int room_tag_exits_visible( Room, xmlTextReaderPtr );
+
+// int read in hidden exits tag
+int room_tag_exits_hidden( Room, xmlTextReaderPtr );
+
+// int read in visible exit
+int room_tag_visible_exit( Room, xmlTextReaderPtr );
+
+// int read in hidden exit
+int room_tag_hidden_exit( Room, xmlTextReaderPtr );
+
+// get a value
+const xmlChar *room_tag_get_value( xmlTextReaderPtr raeder );
 
 // destroy a room
 void destroy_room( Room );
@@ -136,6 +176,25 @@ char *room_get_description( Room );
 
 // get the full description of the room
 int room_get_full_description( Room, User, char **, int * );
+
+
+/* -----------------------------------------
+ * Exit funcs
+ */
+Exit new_exit( unsigned long );
+
+void exit_open( Exit );
+
+void exit_close( Exit );
+
+void exit_lock( Exit );
+
+void exit_unlock( Exit );
+
+
+void exit_clean( void * );
+
+void destroy_exit( Exit );
 
 #endif /* INC_ROOM_H_ */
 

@@ -14,4 +14,6 @@ int quick_comp( char *, char * );
 
 char *quick_copy( char * );
 
+size_t trimwhitespace(char *out, size_t len, const char *str);
+
 #endif /* INC_FUNC_H_ */

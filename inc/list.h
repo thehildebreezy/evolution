@@ -26,6 +26,9 @@ LinkedList new_linked_list( void *data );
 // free item
 void destroy_linked_item( LinkedList );
 
+// destroy with function
+void destroy_linked_list_func( LinkedList, void func (void *) );
+
 // add item to linked list
 LinkedList add_linked_item( LinkedList, void * );
 

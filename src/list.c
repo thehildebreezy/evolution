@@ -37,6 +37,28 @@ void destroy_linked_item( LinkedList item ) {
 	free( item );
 }
 
+void destroy_linked_list_func( LinkedList list, void func (void *) )
+{
+    
+    LinkedList cur = list;
+    while( cur != NULL ){
+    
+        LinkedList next = cur->next;
+        
+        cur->next = NULL;
+        
+        if( cur->data != NULL ){
+            
+            func( cur->data );
+            cur->data = NULL;
+        }
+            
+        destroy_linked_item( cur );
+        
+        cur = next;
+    }
+}
+
 // add item to linked list
 LinkedList add_linked_item( LinkedList list, void * item ) {
 
