@@ -20,7 +20,7 @@
  * Create a new character struct
  * @return the new character struct pointer
  */
-Character new_character( ) {
+Character new_character( void *parent ) {
 
 	Character character = (Character)malloc(
 			sizeof( struct character_struct )
@@ -36,7 +36,7 @@ Character new_character( ) {
     memset( character, 0, sizeof( struct character_struct ) );
 
 	// set default user to none
-	character->user = NULL;
+	character->parent = parent;
 
 	strcpy(character->name, "Newman");
 	
@@ -78,9 +78,22 @@ Room char_get_room( Character character )
  */
 void char_set_room( Character character, Room room )
 {
+    Room leaving = character->room;
+
+    // set character location
     char_lock( character );
     character->room = room;
     char_unlock( character );
+    
+    // remove character from this room
+    room_lock( leaving );
+    //room_remove_mob( (Mob)(((User)(character->parent))->parent) );
+    room_unlock( leaving );
+    
+    // set room characters
+    room_lock( room );
+    //room_add_mob( (Mob)(((User)(character->parent))->parent) );
+    room_unlock( room );
 }
 
 /**

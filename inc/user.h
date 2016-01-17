@@ -17,6 +17,7 @@ typedef struct character_struct *Character;
 #include "character.h"
 #include "client.h"
 #include "pthread.h"
+#include "mob.h"
 
 #define USER_FLAG_EXIT 1 << 0
 
@@ -24,6 +25,10 @@ typedef struct character_struct *Character;
 // need to pre define this before including character
 typedef struct user_struct {
 
+    // parent is the mob
+    Mob parent;
+
+    // children are characters and clients
 	Character character;
 	Client client;
 	pthread_mutex_t mutex;

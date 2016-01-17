@@ -40,7 +40,7 @@
 // forward declaration
 typedef struct evolution_management_struct * Management;
 
-
+/** Tag context for traversing xml */
 typedef enum tag_context_enum {
     TAG_CONTEXT_ROOM,
     TAG_CONTEXT_TRIGGERS,
@@ -49,8 +49,9 @@ typedef enum tag_context_enum {
     TAG_CONTEXT_EXIT_HIDDEN,
 } TAG_CONTEXT;
 
+/** Types of standard exits */
 typedef enum exit_type_enum {
-    EXIT_TYPE_SPECIAL,
+    EXIT_TYPE_SPECIAL = 0,
     EXIT_TYPE_N,
     EXIT_TYPE_S,
     EXIT_TYPE_E,
@@ -62,26 +63,19 @@ typedef enum exit_type_enum {
     EXIT_TYPE_UP,
     EXIT_TYPE_DOWN,
     EXIT_TYPE_IN,
-    EXIT_TYPE_OUT
+    EXIT_TYPE_OUT,
+    EXIT_TYPE_MAX
 } EXIT_TYPE;
 
+/** constant array of directions for quick lookup */
+extern const char *EXIT_TYPE_NAMES[];
 
-#define EXIT_STATUS char
+
+#define EXIT_STATUS unsigned char
 #define EXIT_STATUS_CLOSED  1
 #define EXIT_STATUS_LOCKED  1 << 1
 #define EXIT_STATUS_HIDDEN  1 << 2
 #define EXIT_STATUS_SPECIAL 1 << 3
-
-/*
-typedef enum exit_status_enum {
-    EXIT_STATUS_NONE,
-    EXIT_STATUS_SPECIAL,
-    EXIT_STATUS_OPEN,
-    EXIT_STATUS_CLOSED,
-    EXIT_STATUS_LOCKED,
-    EXIT_STATUS_UNK
-} EXIT_STATUS;
-*/
 
 // room structure
 typedef struct room_struct {
@@ -174,9 +168,17 @@ void room_unlock( Room );
 char *room_get_title( Room );
 char *room_get_description( Room );
 
+// get room exits
+LinkedList room_get_exits( Room );
+
 // get the full description of the room
 int room_get_full_description( Room, User, char **, int * );
 
+
+/* -------------------------------------------------
+ * Room directional getters
+ */
+Room room_get_north( Room, HashTable );
 
 /* -----------------------------------------
  * Exit funcs
@@ -190,6 +192,17 @@ void exit_close( Exit );
 void exit_lock( Exit );
 
 void exit_unlock( Exit );
+
+/* --------------------------------------------------------
+ * Exit getters
+ */
+ 
+// get direction text
+const char *exit_get_dir_text( Exit );
+
+// check if is hidden
+EXIT_STATUS exit_is_hidden( Exit );
+
 
 
 void exit_clean( void * );

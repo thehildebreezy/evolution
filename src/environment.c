@@ -179,27 +179,8 @@ void *user_thread( void *arg ) {
 
     char_set_room( user->character, login_room );
 
-	// get login
-	int desc_length = 2048;
-	char *desc = malloc( desc_length );
-	
-	// init
-	memset( desc, 0, desc_length );
-	
-    int len = room_get_full_description( 
-        login_room,
-        user,
-        &desc,
-        &desc_length );
-
-	// send the login screen
-	if( len > 0 )
-	    client_send( user->client, desc );
-
-	// free up the buffer
-	if( desc != NULL ){
-		free( desc );
-	}
+    // have a look
+    action_look( NULL, user, manager );
 
     // client_prompt(  )
 

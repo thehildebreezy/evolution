@@ -14,7 +14,7 @@
 #include "../inc/user.h"
 #include "../inc/client.h"
 #include "../inc/character.h"
-
+#include "../inc/mob.h"
 
 /**
  * Create a new user
@@ -23,21 +23,32 @@
  */
 User new_user( Client client ) {
 
+
 	User user = malloc( sizeof(struct user_struct ) );
 	if( user == NULL ){
 		perror("Malloc user");
 		return NULL;
 	}
-
+	
     // init
     memset( user, 0, sizeof( struct user_struct ) );
+    
+    // generate the parent, if this fails everything does
+    Mob mob = new_mob( MOB_TYPE_USER, user );
+    if( mob == NULL ){
+        perror("malloc mob");
+        free( user );
+        return NULL;
+    }
+    
+    user->parent = mob;
 
 	user->client = client;
 
     user->flags = 0;
-
+    
 	// create character
-	Character character = new_character();
+	Character character = new_character( user );
 	user->character = character;
 
 

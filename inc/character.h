@@ -35,7 +35,8 @@ typedef struct character_struct {
 	
 
 	// if it has a user it will be associated here
-	User user;
+	//User user;
+	void *parent;
 
 	// mutex
 	pthread_mutex_t mutex;
@@ -47,7 +48,7 @@ typedef struct character_struct {
  * Methods
  */
 
-Character new_character( );
+Character new_character( void * );
 void destroy_character( Character );
 
 // get character room

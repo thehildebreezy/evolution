@@ -19,6 +19,21 @@
 #include "../inc/hash.h"
 #include "../inc/management.h"
 
+const char *EXIT_TYPE_NAMES[] = {
+    "other",
+    "north",
+    "south",
+    "east",
+    "west",
+    "northeast",
+    "northwest",
+    "southeast",
+    "southwest",
+    "up",
+    "down",
+    "in",
+    "out"
+};
 
 
 /**
@@ -754,6 +769,10 @@ void destroy_room( Room room ) {
 	free( room );
 }
 
+/* ------------------------------------------------------------
+ * Getters
+ */
+
 /**
  * Get the room structure for the room id
  * @param rooms the hashtable of rooms from the manager
@@ -814,6 +833,7 @@ int room_get_full_description(
     int title_len = strlen( title );
     int descr_len = strlen( desc );
 
+
     if( title_len + descr_len >= *length ){
     
         // grow buffer
@@ -841,12 +861,24 @@ int room_get_full_description(
 	return title_len + descr_len + 2;
 }
 
+
+/** 
+ * Get a list of exits for the room
+ * @param room the room to look in
+ * @return List of exits for this room
+ */
+LinkedList room_get_exits( Room room )
+{
+    return room->exits;
+}
+
 /**
  * Locks the room struct for threaded use
  * @param room Room to lock
  */
 void room_lock( Room room ) {
-	pthread_mutex_lock( &(room->mutex) );
+    if( room != NULL )
+	    pthread_mutex_lock( &(room->mutex) );
 }
 
 /**
@@ -854,7 +886,31 @@ void room_lock( Room room ) {
  * @param room Room struct to unlock
  */
 void room_unlock( Room room ) {
-	pthread_mutex_unlock( &(room->mutex) );
+    if( room != NULL  )
+    	pthread_mutex_unlock( &(room->mutex) );
+}
+
+
+
+/* -------------------------------------------------
+ * Room directional getters
+ */
+/**
+ * Try to go north
+ * @param room The current room to move from
+ * @return Room to the north or NULL if none
+ */
+Room room_get_north( Room room, HashTable rooms )
+{
+    LinkedList exit_link = room_get_exits( room );
+    while( exit_link != NULL ){
+        Exit exit = (Exit) exit_link->data;
+        if( exit->type == EXIT_TYPE_N ){
+            Room north = room_get( rooms, exit->roomid );
+            return north;
+        }
+    }
+    return NULL;
 }
 
 
@@ -923,6 +979,31 @@ void exit_unlock( Exit exit )
     exit->status &= ~(EXIT_STATUS_LOCKED);
 }
 
+/* ----------------------------------------------------
+ * Exit getters
+ */
+
+/**
+ * Get the text value of the direction of the exit
+ * @param exit Exit to check
+ * @return constant character value from the list of type names
+ */
+const char *exit_get_dir_text( Exit exit )
+{
+    if( exit != NULL && exit->type >= 0 && exit->type < EXIT_TYPE_MAX )
+        return EXIT_TYPE_NAMES[ exit->type ];
+    return NULL;
+}
+
+/**
+ * Check if the exit is a hidden exit
+ * @param exit Exit to check
+ * @return greater than 0 on hidden, 0 on not hidden
+ */
+EXIT_STATUS exit_is_hidden( Exit exit )
+{
+    return exit->status & EXIT_STATUS_HIDDEN; 
+}
 
 
 /**

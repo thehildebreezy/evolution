@@ -35,12 +35,24 @@ int action_parse_response(
 Action new_action( void *(*action_func)( const char *, User, Management ) );
 
 // exit action
-void *action_exit( const char *, User, Management);
+void *action_quit( const char *, User, Management);
 
 // look action
 void *action_look( const char *, User, Management);
 
 // shout action
-void *action_shout( const char *response, User user, Management manager);
+void *action_shout( const char *, User, Management);
+
+/* ------------------------------------------------
+ * Actions to move around
+ */
+
+// go to a room - master action for movement
+void *action_go_to_room( Room, User, Management );
+
+// go north
+void *action_north( const char *, User, Management);
+
+
 
 #endif /* INC_ACTION_H_ */

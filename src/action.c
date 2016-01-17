@@ -15,6 +15,7 @@
 #include "../inc/user.h"
 #include "../inc/management.h"
 #include "../inc/character.h"
+#include "../inc/room.h"
 
 
 /**
@@ -24,8 +25,15 @@
 void action_add_to_manager( Management manager ) {
 
 	// add exit action to actions table
-	Action exit = new_action( action_exit );
-	hash_table_add( manager->actions, (void *)"exit", exit);
+	Action quit = new_action( action_quit );
+	hash_table_add( manager->actions, (void *)"quit", quit);
+
+    /* --------------------
+     * movement actions
+     */
+    // north
+    Action north = new_action( action_north );
+    hash_table_add( manager->actions, (void *)"north", north);
 
 	// add look action to actions table
 	Action look = new_action( action_look );
@@ -128,12 +136,12 @@ Action new_action( void *(*action_func)( const char *, User, Management ) ) {
 }
 
 /**
- * Exit from the game
+ * Quit from the game
  * @param response message following action command
  * @param user User making action request
  * @param manager Global resource manager
  */
-void *action_exit( const char *response, User user, Management manager) 
+void *action_quit( const char *response, User user, Management manager) 
 {
     user_lock( user );
 	user_exit( user );
@@ -152,6 +160,9 @@ void *action_look( const char *response, User user, Management manager) {
     user_lock( user );
 	
 	Room current = char_get_room( user->character );
+	if( current == NULL ){
+	    client_send( user->client, "You do not appear to be anywhere\n");
+	}
 	
 	// get login
 	int desc_length = 2048;
@@ -168,6 +179,38 @@ void *action_look( const char *response, User user, Management manager) {
 
 	// send the login screen
 	client_send( user->client, desc );
+	
+	
+	// loop over exits
+	LinkedList link = room_get_exits( current );
+	
+	int shown = 0;
+	
+    while( link != NULL ){
+        
+        Exit exit = (Exit) link->data;
+        
+        // if not hidden
+        if( exit_is_hidden( exit ) == 0 ) {
+        
+            const char *exit_name = exit_get_dir_text( exit );
+            
+            if( exit_name != NULL ){
+                
+                if( shown > 0 )
+                    client_send( user->client, (char *)"," );
+                
+                shown = 1;
+                client_send( user->client, (char *)exit_name );
+            }
+        }
+        
+        link = next_linked_item( link );
+        
+    }
+	
+	if( shown > 0 )
+	    client_send( user->client, (char *)"\n" );
 
 	// free up the buffer
 	if( desc != NULL ){
@@ -228,4 +271,45 @@ void *action_shout( const char *response, User user, Management manager) {
 	
 	return NULL;
 }
+
+
+/* ------------------------------------------------
+ * Actions to move around
+ */
+
+/**
+ * Go to the specified room. Is a master action not directly
+ * actionable
+ * @param room Room to try and go to
+ * @param user User trying to move
+ * @param manager The manager we're moving in
+ */
+void *action_go_to_room( Room room, User user, Management manager )
+{
+    if( room == NULL ){
+        client_send( user->client, "You can't seem to go that way.\n");
+        return NULL;
+    }
+    
+    char_set_room( user->character, room );
+    
+    action_look( NULL, user, manager );
+    
+    return NULL;
+}
+
+
+/**
+ * Go north
+ * @param response message following action command
+ * @param user User making action request
+ * @param manager Global resource manager
+ */
+void *action_north( const char *response, User user, Management manager)
+{
+    Room room = char_get_room( user->character );
+    Room next = room_get_north( room, manager->rooms );
+    action_go_to_room( next, user, manager );
+}
+
 
