@@ -1,13 +1,20 @@
+<?xml version="1.0"?>
 <world name="Aerith">
     
-    <continent src="core" name="Tyrol">
+    <continent src="core" name="Core">
     
         <area name="start" area-id="0">
-            <room>login</room>
-            <room>birth</room>
-            <room>growth</room>
+            <room>login</room> <!-- 0 -->
+            <room>birth</room> <!-- 1 -->
+            <room>growth</room> <!-- 2 -->
         </area>
     
+    </continent>
+    
+    <continent src="tyrol" name="Tyrol">
+        <area name="community" area-id="1">
+            <room>hills0</room> <!-- 3 -->
+        </area>
     </continent>
     
 </world>

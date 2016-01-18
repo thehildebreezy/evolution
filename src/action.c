@@ -32,8 +32,28 @@ void action_add_to_manager( Management manager ) {
      * movement actions
      */
     // north
-    Action north = new_action( action_north );
+    Action north = new_action_linked( action_north, 2 );
     hash_table_add( manager->actions, (void *)"north", north);
+    hash_table_add( manager->actions, (void *)"n", north);
+    
+    // south
+    Action south = new_action_linked( action_south, 2 );
+    hash_table_add( manager->actions, (void *)"south", south);
+    hash_table_add( manager->actions, (void *)"s", south);
+    
+    // east
+    Action east = new_action_linked( action_east, 2 );
+    hash_table_add( manager->actions, (void *)"east", east);
+    hash_table_add( manager->actions, (void *)"e", east);
+    
+    // west
+    Action west = new_action_linked( action_west, 2 );
+    hash_table_add( manager->actions, (void *)"west", west);
+    hash_table_add( manager->actions, (void *)"w", west);
+    
+    /* --------------------
+     * common actions
+     */
 
 	// add look action to actions table
 	Action look = new_action( action_look );
@@ -52,7 +72,19 @@ void action_clean( HashTable actions ) {
     if( actions != NULL ){
         // clean everything, no special malloc so should be good
         // might have to add a func later or special data destruction
-        destroy_hash_table_data( actions );
+        destroy_hash_table_func( actions, destroy_action );
+    }
+}
+
+/**
+ * Destroy the action when links run out
+ * @param action the action to destroy
+ */
+void destroy_action( void *action )
+{
+    ((Action)action)->links--;
+    if( ((Action)action)->links <= 0 ){
+        free( action );
     }
 }
 
@@ -131,8 +163,18 @@ Action new_action( void *(*action_func)( const char *, User, Management ) ) {
 	memset( action, 0, sizeof(struct action_struct) );
 	
 	action->action_func = action_func;
+	
+	action->links = 1;
 
 	return action;
+}
+
+
+Action new_action_linked( void *(*action_func)( const char *, User, Management ), char links )
+{
+    Action action = new_action( action_func );
+    action->links = links;
+    return action;
 }
 
 /**
@@ -159,7 +201,7 @@ void *action_look( const char *response, User user, Management manager) {
 
     user_lock( user );
 	
-	Room current = char_get_room( user->character );
+	Room current = char_get_room( user->parent->character );
 	if( current == NULL ){
 	    client_send( user->client, "You do not appear to be anywhere\n");
 	}
@@ -252,7 +294,7 @@ void *action_shout( const char *response, User user, Management manager) {
 			// send name of sender
 			client_send(
 					current->client,
-					current->character->name
+					current->parent->character->name
 			);
 
 			// what to do when the client is not the user
@@ -291,7 +333,7 @@ void *action_go_to_room( Room room, User user, Management manager )
         return NULL;
     }
     
-    char_set_room( user->character, room );
+    char_set_room( user->parent->character, room );
     
     action_look( NULL, user, manager );
     
@@ -307,9 +349,47 @@ void *action_go_to_room( Room room, User user, Management manager )
  */
 void *action_north( const char *response, User user, Management manager)
 {
-    Room room = char_get_room( user->character );
+    Room room = char_get_room( user->parent->character );
     Room next = room_get_north( room, manager->rooms );
     action_go_to_room( next, user, manager );
 }
 
+/**
+ * Go south
+ * @param response message following action command
+ * @param user User making action request
+ * @param manager Global resource manager
+ */
+void *action_south( const char *response, User user, Management manager)
+{
+    Room room = char_get_room( user->parent->character );
+    Room next = room_get_south( room, manager->rooms );
+    action_go_to_room( next, user, manager );
+}
+
+/**
+ * Go east
+ * @param response message following action command
+ * @param user User making action request
+ * @param manager Global resource manager
+ */
+void *action_east( const char *response, User user, Management manager)
+{
+    Room room = char_get_room( user->parent->character );
+    Room next = room_get_east( room, manager->rooms );
+    action_go_to_room( next, user, manager );
+}
+
+/**
+ * Go west
+ * @param response message following action command
+ * @param user User making action request
+ * @param manager Global resource manager
+ */
+void *action_west( const char *response, User user, Management manager)
+{
+    Room room = char_get_room( user->parent->character );
+    Room next = room_get_west( room, manager->rooms );
+    action_go_to_room( next, user, manager );
+}
 

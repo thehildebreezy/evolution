@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<room id="3" title="Amongst the rolling hills">
+    
+    <description>
+You feel great, born into this wonderful world. Look at how the hills roll here, next to the ocean were we all emerged from. It feels good to be alive.
+    </description>
+
+    <spawns>
+        <mob interval="60" id="1" />
+    </spawns>
+
+    <exits>
+        <visible>
+            <exit room="4" type="standard">
+                <state>open</state>
+                <direction>north</direction>
+            </exit>
+            <exit room="5" type="standard">
+                <state>open</state>
+                <direction>east</direction>
+            </exit>
+            <exit room="6" type="standard">
+                <state>open</state>
+                <direction>west</direction>
+            </exit>
+        </visible>
+    </exits>
+
+</room>

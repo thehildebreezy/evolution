@@ -15,6 +15,7 @@
 #include "../inc/list.h"
 #include "../inc/hash.h"
 #include "../inc/room.h"
+#include "../inc/mobile.h"
 
 /**
  * Create a new server manager
@@ -52,7 +53,16 @@ Management new_manager() {
 		
 		
 	// generate the hash table for rooms
+	// sourced by id, integer style
 	manager->rooms = create_hash_table(
+			253,
+			int_hash,
+			int_comp_func
+		);
+		
+	// generate the hash table for mobiles
+	// sourced by mobile id, integer style
+	manager->mobiles = create_hash_table(
 			253,
 			int_hash,
 			int_comp_func
@@ -83,6 +93,10 @@ void destroy_manager( Management manager ) {
 	
 	if( manager->rooms != NULL ){
 	    room_clean( manager->rooms );
+	}
+	
+	if( manager->mobiles != NULL ){
+	    mobile_clean( manager->mobiles );
 	}
 	
 	pthread_mutex_destroy( &(manager->users_mutex ));

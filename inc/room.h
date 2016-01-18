@@ -33,9 +33,6 @@
 #define TAG_VALUE_NORTH 555
 
 
-#define NODE_ELEMENT 1
-#define NODE_ENDELEMENT 15
-#define NODE_TEXT 3
 
 // forward declaration
 typedef struct evolution_management_struct * Management;
@@ -93,6 +90,18 @@ typedef struct room_struct {
 	char *description;
 
     LinkedList exits;
+    
+    // all the mobs in the room
+    LinkedList mobs;
+    
+    // special list for users
+    LinkedList users;
+
+    // count number of ticks on current room
+    unsigned short tick_count;
+
+    // list of mobiles that spawn here
+    LinkedList spawns;
 
     // mutex
     pthread_mutex_t mutex;
@@ -178,7 +187,11 @@ int room_get_full_description( Room, User, char **, int * );
 /* -------------------------------------------------
  * Room directional getters
  */
+Room room_get_dir( Room, HashTable, EXIT_TYPE );
 Room room_get_north( Room, HashTable );
+Room room_get_south( Room, HashTable );
+Room room_get_east( Room, HashTable );
+Room room_get_west( Room, HashTable );
 
 /* -----------------------------------------
  * Exit funcs

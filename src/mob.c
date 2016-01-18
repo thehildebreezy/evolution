@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "../inc/mob.h"
+#include "../inc/character.h"
 
 /**
  * Craete a new mob to parent the other mob types
@@ -22,6 +23,15 @@ Mob new_mob( MOB_TYPE type, void *mob_data )
     mob->mob = mob_data;
     mob->type = type;
     
+    Character character = new_character( mob );
+    if( character == NULL ){
+        printf("error creating character for mob\n");
+        free( mob );
+        return NULL;
+    }
+    
+    mob->character = character;
+    
     return mob;
 }
 
@@ -31,5 +41,6 @@ Mob new_mob( MOB_TYPE type, void *mob_data )
  */
 void destroy_mob( Mob mob )
 {
+    destroy_character( mob->character );
     free( mob );
 }

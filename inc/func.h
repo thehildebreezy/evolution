@@ -8,6 +8,11 @@
 #ifndef INC_FUNC_H_
 #define INC_FUNC_H_
 
+
+#define NODE_ELEMENT 1
+#define NODE_ENDELEMENT 15
+#define NODE_TEXT 3
+
 int grow_buffer( void **, int );
 
 int quick_comp( char *, char * );

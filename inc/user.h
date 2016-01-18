@@ -28,9 +28,9 @@ typedef struct user_struct {
     // parent is the mob
     Mob parent;
 
-    // children are characters and clients
-	Character character;
+    // children clients
 	Client client;
+	
 	pthread_mutex_t mutex;
     unsigned char flags;
 

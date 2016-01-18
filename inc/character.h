@@ -30,12 +30,14 @@ typedef struct character_struct {
 	// unsigned long location;
 	Room room;
 
+    unsigned char level;
+    
+    unsigned long experience;
+
 	// character stats
 	Stats stats;
 	
-
-	// if it has a user it will be associated here
-	//User user;
+	// self reference to mob parent
 	void *parent;
 
 	// mutex

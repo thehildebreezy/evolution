@@ -42,14 +42,20 @@ obj/user.o: src/user.c
 obj/mob.o: src/mob.c
 	gcc -c -o obj/mob.o `xml2-config --cflags` src/mob.c `xml2-config --libs`
 
+obj/mobile.o: src/mobile.c
+	gcc -c -o obj/mobile.o `xml2-config --cflags` src/mobile.c `xml2-config --libs`
+
+obj/mobs.a: obj/character.o obj/stats.o obj/user.o obj/mob.o obj/mobile.o
+	ar cr obj/mobs.a obj/character.o obj/stats.o obj/user.o obj/mob.o obj/mobile.o
+
 obj/action.o: src/action.c
 	gcc -c -o obj/action.o `xml2-config --cflags` src/action.c `xml2-config --cflags` 
 	
 obj/room.o: src/room.c
 	gcc -c -o obj/room.o `xml2-config --cflags` src/room.c `xml2-config --libs`
 
-evolution: evolution.c obj/network.a obj/management.o obj/environment.o obj/util.a obj/mob.o obj/character.o obj/user.o obj/action.o obj/room.o obj/stats.o
-	gcc -o evolution `xml2-config --cflags` evolution.c obj/network.a obj/management.o obj/environment.o obj/util.a obj/mob.o obj/character.o obj/user.o obj/action.o obj/room.o obj/stats.o -lpthread  `xml2-config --libs`
+evolution: evolution.c obj/network.a obj/management.o obj/environment.o obj/util.a obj/mobs.a obj/action.o obj/room.o
+	gcc -o evolution `xml2-config --cflags` evolution.c obj/network.a obj/management.o obj/environment.o obj/util.a obj/mobs.a obj/action.o obj/room.o -lpthread  `xml2-config --libs`
 
 clean:
 	rm obj/*.o obj/*.a evolution

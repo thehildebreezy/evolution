@@ -293,6 +293,10 @@ Room room_from_file( char *file ){
 
     room->exits = NULL;
     
+    room->mobs = NULL;
+    
+    room->users = NULL;
+    
     
     // start text reader
     xmlTextReaderPtr reader;
@@ -895,6 +899,29 @@ void room_unlock( Room room ) {
 /* -------------------------------------------------
  * Room directional getters
  */
+ 
+/**
+ * Try to go a direction
+ * @param room The current room to move from
+ * @param rooms Rooms table to look in
+ * @param dir The direction to try
+ * @return Room to the north or NULL if none
+ */
+Room room_get_dir( Room room, HashTable rooms, EXIT_TYPE dir )
+{
+    LinkedList exit_link = room_get_exits( room );
+    while( exit_link != NULL ){
+        Exit exit = (Exit) exit_link->data;
+        if( exit->type == dir ){
+            Room next = room_get( rooms, exit->roomid );
+            return next;
+        }
+        exit_link = next_linked_item( exit_link );
+    }
+    return NULL;
+
+}
+
 /**
  * Try to go north
  * @param room The current room to move from
@@ -902,17 +929,38 @@ void room_unlock( Room room ) {
  */
 Room room_get_north( Room room, HashTable rooms )
 {
-    LinkedList exit_link = room_get_exits( room );
-    while( exit_link != NULL ){
-        Exit exit = (Exit) exit_link->data;
-        if( exit->type == EXIT_TYPE_N ){
-            Room north = room_get( rooms, exit->roomid );
-            return north;
-        }
-    }
-    return NULL;
+    return room_get_dir( room, rooms, EXIT_TYPE_N );
 }
 
+/**
+ * Try to go south
+ * @param room The current room to move from
+ * @return Room to the north or NULL if none
+ */
+Room room_get_south( Room room, HashTable rooms )
+{
+    return room_get_dir( room, rooms, EXIT_TYPE_S );
+}
+
+/**
+ * Try to go east
+ * @param room The current room to move from
+ * @return Room to the north or NULL if none
+ */
+Room room_get_east( Room room, HashTable rooms )
+{
+    return room_get_dir( room, rooms, EXIT_TYPE_E );
+}
+
+/**
+ * Try to go west
+ * @param room The current room to move from
+ * @return Room to the north or NULL if none
+ */
+Room room_get_west( Room room, HashTable rooms )
+{
+    return room_get_dir( room, rooms, EXIT_TYPE_W );
+}
 
 /* ===========================================================
  * Exit functions

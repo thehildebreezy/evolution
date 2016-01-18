@@ -42,6 +42,10 @@ Character new_character( void *parent ) {
 	
 	character->room = NULL;
 	//character->location = 0;
+	
+	character->level = 0;
+	
+	character->experience = 0;
 
 	// mutex
 	pthread_mutex_t mutex;

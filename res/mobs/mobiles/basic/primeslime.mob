@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<mobile id="0" title="primordial slime">
+    <tags>
+        <tag name="prime" />
+        <tag name="slime" />
+    </tags>
+    
+    <description>
+It's disgusting, really. The most primative of creatures barely consisting of more than a few cells. It seems like it's trying to eat you.   
+    </description>
+
+    <attributes>
+        <attribute name="aggro">0</attribute>
+        <attribute name="exp">5</attributes>
+    </attributes>
+    
+    <level value="1" />>
+    
+    <stats>
+        <power value="3" />
+        <adapt value="1" />
+        <nimble value="2" />
+        <res value="4" />
+        <cunning value="1" />
+        <appeal value="1" />
+        <health value="10" />
+        <energy value="1" />
+        <moves value="25" />
+    </stats>
+    
+    <!-- informative, rooms control spawns -->
+    <spawns max="10" interval="60">
+        <room value="4" />
+        <room value="5" />
+    </spawns>
+    
+    <rooms>
+        <room value="4" />
+        <room value="5" />
+        <room value="6" />
+    </rooms>
+
+</mobile>

@@ -22,35 +22,38 @@ typedef enum stats_enum {
 } EVO_STAT;
 
 
+/** constant array of stats for quick lookup */
+extern const char *STAT_NAMES[];
+
 // stats structure
 struct stats_struct {
 
 	// strength
-	int power;
+	short power;
 
 	// adaptability/intellect
-	int adapt;
+	short adapt;
 
 	// nimbleness/dexterity
-	int nimble;
+	short nimble;
 
 	// resiliance/constitution
-	int res;
+	short res;
 
 	// cunning/wisdom
-	int cunning;
+	short cunning;
 
 	// appeal/charisma
-	int appeal;
+	short appeal;
 
 	// health/ hp
-	int health;
+	long health;
 
 	// energy/ mana
-	int energy;
+	long energy;
 
 	// standard moves
-	int moves;
+	long moves;
 
 };
 

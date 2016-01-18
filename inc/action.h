@@ -15,6 +15,7 @@
 // action structure
 typedef struct action_struct {
 	void *(*action_func)( const char *, User, Management );
+	char links; // number of links in this function, used for freeing
 } * Action;
 
 
@@ -23,6 +24,9 @@ void action_add_to_manager( Management );
 
 // clean up  actions from the manager
 void action_clean( HashTable );
+
+// destroy the action
+void destroy_action( void * );
 
 // parse the response
 int action_parse_response(
@@ -33,6 +37,9 @@ int action_parse_response(
 
 // create a new action
 Action new_action( void *(*action_func)( const char *, User, Management ) );
+
+// create a new action with extra links
+Action new_action_linked( void *(*action_func)( const char *, User, Management ), char );
 
 // exit action
 void *action_quit( const char *, User, Management);
@@ -52,6 +59,9 @@ void *action_go_to_room( Room, User, Management );
 
 // go north
 void *action_north( const char *, User, Management);
+void *action_south( const char *, User, Management);
+void *action_east( const char *, User, Management);
+void *action_west( const char *, User, Management);
 
 
 

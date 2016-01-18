@@ -177,7 +177,7 @@ void *user_thread( void *arg ) {
         //return 0;
     }
 
-    char_set_room( user->character, login_room );
+    char_set_room( user->parent->character, login_room );
 
     // have a look
     action_look( NULL, user, manager );

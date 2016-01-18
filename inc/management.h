@@ -33,6 +33,9 @@ typedef struct evolution_management_struct {
 	
 	// hashtable of available rooms
 	HashTable rooms;
+	
+	// hashtable of the mobiles
+	HashTable mobiles;
 
 } * Management;
 

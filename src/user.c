@@ -47,11 +47,6 @@ User new_user( Client client ) {
 
     user->flags = 0;
     
-	// create character
-	Character character = new_character( user );
-	user->character = character;
-
-
 	// create mutex
 	pthread_mutex_t mutex;
 	int status = pthread_mutex_init( &mutex, NULL );
@@ -67,7 +62,10 @@ User new_user( Client client ) {
 void destroy_user( User user ) {
 
 	pthread_mutex_destroy(&(user->mutex));
-	destroy_character( user->character );
+	
+	// destroy parent
+	destroy_mob( user->parent );
+	
 	free( user );
 
 }
